@@ -38,16 +38,7 @@ pnpm run dev
 | User App | http://localhost:3000 | Main social media interface |
 | API Server | http://localhost:3001 | gRPC API (health check at /health) |
 
-## Test Accounts
 
-After running the seed script:
-
-### Regular Users
-- alice@test.com / password123
-- bob@test.com / password123
-- charlie@test.com / password123
-- diana@test.com / password123
-- eve@test.com / password123
 
 
 
