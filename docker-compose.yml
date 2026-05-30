@@ -29,19 +29,6 @@ services:
       - api
     restart: always
 
-  client-admin:
-    build:
-      context: .
-      dockerfile: apps/client-admin/Dockerfile
-    ports:
-      - "3002:3002"
-    environment:
-      - NODE_ENV=production
-      - GRPC_API_HOST=api:50051
-      - SESSION_SECRET=${SESSION_SECRET:-vaye-production-secret-change-me}
-    depends_on:
-      - api
-    restart: always
 
 volumes:
   vaye-data:

@@ -36,7 +36,6 @@ pnpm run dev
 | Service | URL | Description |
 |---------|-----|-------------|
 | User App | http://localhost:3000 | Main social media interface |
-| Admin App | http://localhost:3002 | Admin dashboard |
 | API Server | http://localhost:3001 | gRPC API (health check at /health) |
 
 ## Test Accounts
@@ -50,8 +49,7 @@ After running the seed script:
 - diana@test.com / password123
 - eve@test.com / password123
 
-### Admin User
-- ayushsaini9294@gmail.com / ayush9294saini
+
 
 ## Features
 
@@ -75,14 +73,7 @@ After running the seed script:
 - **Notifications** - Alerts for likes, comments, follows, and mentions
 - **Mentions** - @username linking in posts and comments
 
-### Admin Application
 
-- **Dashboard** - Platform statistics and overview
-- **User Management** - View, search, suspend/unsuspend users
-- **Post Management** - Moderate and delete posts
-- **Comment Management** - Moderate and delete comments
-- **Reports** - Handle user reports on content
-- **Audit Logs** - Track all administrative actions
 
 ## Project Structure
 
