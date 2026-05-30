@@ -1,0 +1,20 @@
+syntax = "proto3";
+package vaye.feed;
+
+import "common.proto";
+import "posts.proto";
+
+service FeedService {
+  rpc GetHomeFeed(GetHomeFeedRequest) returns (vaye.posts.PostsResponse);
+  rpc GetExploreFeed(GetExploreFeedRequest) returns (vaye.posts.PostsResponse);
+}
+
+message GetHomeFeedRequest {
+  string session_token = 1;
+  vaye.common.PaginationRequest pagination = 2;
+}
+
+message GetExploreFeedRequest {
+  vaye.common.PaginationRequest pagination = 1;
+  optional string session_token = 2;
+}

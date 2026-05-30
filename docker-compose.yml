@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "3001:3001"
+      - "50051:50051"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/db/vaye.db
+    volumes:
+      - vaye-data:/app/db
+    restart: always
+
+  client-user:
+    build:
+      context: .
+      dockerfile: apps/client-user/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GRPC_API_HOST=api:50051
+      - SESSION_SECRET=${SESSION_SECRET:-vaye-production-secret-change-me}
+    depends_on:
+      - api
+    restart: always
+
+  client-admin:
+    build:
+      context: .
+      dockerfile: apps/client-admin/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - GRPC_API_HOST=api:50051
+      - SESSION_SECRET=${SESSION_SECRET:-vaye-production-secret-change-me}
+    depends_on:
+      - api
+    restart: always
+
+volumes:
+  vaye-data:
