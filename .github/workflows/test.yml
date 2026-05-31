@@ -21,13 +21,38 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-        timeout-minutes: 6
 
-      - name: Run sanity check tests
-        uses: speechify-recruiting/llm-test-action@main
-        id: llm-test-action
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          test-type: "llm-web-test"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        timeout-minutes: 5
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.15.0
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Generate protobuf
+        run: pnpm run proto:generate
+
+      - name: Run lint
+        run: pnpm run lint
+
+      - name: Run unit tests
+        run: pnpm run test
