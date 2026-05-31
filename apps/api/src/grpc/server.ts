@@ -2,6 +2,7 @@ import {
 	AdminService,
 	AuthService,
 	BookmarksService,
+	ChatService,
 	CommentsService,
 	FeedService,
 	FollowsService,
@@ -16,6 +17,7 @@ import { adaptService } from "@protobuf-ts/grpc-backend";
 import { adminHandler } from "./handlers/admin.handler";
 import { authHandler } from "./handlers/auth.handler";
 import { bookmarksHandler } from "./handlers/bookmarks.handler";
+import { chatHandler } from "./handlers/chat.handler";
 import { commentsHandler } from "./handlers/comments.handler";
 import { feedHandler } from "./handlers/feed.handler";
 import { followsHandler } from "./handlers/follows.handler";
@@ -40,6 +42,7 @@ export function startGrpcServer(port: number): Promise<Server> {
 	server.addService(...adaptService(AdminService, adminHandler));
 	server.addService(...adaptService(NotificationsService, notificationsHandler));
 	server.addService(...adaptService(BookmarksService, bookmarksHandler));
+	server.addService(...adaptService(ChatService, chatHandler));
 
 	return new Promise((resolve, reject) => {
 		server.bindAsync(`0.0.0.0:${port}`, ServerCredentials.createInsecure(), (error, boundPort) => {

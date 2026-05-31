@@ -9,6 +9,9 @@ export * from "../generated/auth.client";
 // Bookmarks
 export * from "../generated/bookmarks";
 export * from "../generated/bookmarks.client";
+// Chat
+export * from "../generated/chat";
+export * from "../generated/chat.client";
 // Comments
 export * from "../generated/comments";
 export * from "../generated/comments.client";

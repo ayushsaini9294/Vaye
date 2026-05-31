@@ -1,6 +1,6 @@
 import type { ISearchService, PostResponse } from "@vaye/proto";
 import { validateSessionToken } from "../../middleware/auth";
-import { searchPosts, searchUsers } from "../../services/search.service";
+import { searchPosts as searchPostsService, searchUsers as searchUsersService } from "../../services/search.service";
 import { toProtoTimestamp } from "../../services/utils";
 
 function toPostResponse(post: any): PostResponse {
@@ -35,7 +35,7 @@ export const searchHandler: ISearchService = {
 			}
 		}
 
-		const posts = await searchPosts(request.query, userId);
+		const posts = await searchPostsService(request.query, userId);
 
 		return {
 			posts: posts.map(toPostResponse),
@@ -43,7 +43,9 @@ export const searchHandler: ISearchService = {
 	},
 
 	async searchUsers(request) {
-		const users = await searchUsers(request.query);
+		console.log("[gRPC searchUsers] query:", request.query);
+		const users = await searchUsersService(request.query);
+		console.log("[gRPC searchUsers] found:", users.length, "users");
 
 		return {
 			users: users.map((user) => ({

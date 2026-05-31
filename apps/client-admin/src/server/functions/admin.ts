@@ -120,3 +120,94 @@ export const getAuditLogsFn = createServerFn({ method: "GET" })
 			})),
 		};
 	});
+
+export const getUserDetailsFn = createServerFn({ method: "GET" })
+	.inputValidator((d: { userId: string }) => d)
+	.handler(async ({ data }) => {
+		const sessionToken = await requireAdminToken();
+		const client = getGrpcClient();
+
+		const { response } = await client.admin.getUserDetails({
+			sessionToken,
+			userId: data.userId,
+		});
+
+		const user = response.user;
+		if (!user) {
+			throw new Error("User not found");
+		}
+
+		return {
+			user: {
+				...user,
+				createdAt: fromProtoTimestamp(user.createdAt).toISOString(),
+				updatedAt: fromProtoTimestamp(user.updatedAt).toISOString(),
+				bannedAt: user.bannedAt ? fromProtoTimestamp(user.bannedAt).toISOString() : undefined,
+			},
+		};
+	});
+
+export const getUserPostsFn = createServerFn({ method: "GET" })
+	.inputValidator((d: { username: string }) => d)
+	.handler(async ({ data }) => {
+		const sessionToken = await requireAdminToken();
+		const client = getGrpcClient();
+
+		const { response } = await client.posts.getUserPosts({
+			sessionToken,
+			username: data.username,
+		});
+
+		return {
+			posts: response.posts.map((post) => ({
+				...post,
+				createdAt: fromProtoTimestamp(post.createdAt).toISOString(),
+				updatedAt: fromProtoTimestamp(post.updatedAt).toISOString(),
+			})),
+		};
+	});
+
+export const banUserFn = createServerFn({ method: "POST" })
+	.inputValidator((d: { userId: string; reason: string }) => d)
+	.handler(async ({ data }) => {
+		const sessionToken = await requireAdminToken();
+		const client = getGrpcClient();
+
+		const { response } = await client.admin.banUser({
+			sessionToken,
+			userId: data.userId,
+			reason: data.reason,
+		});
+
+		return response;
+	});
+
+export const unbanUserFn = createServerFn({ method: "POST" })
+	.inputValidator((d: { userId: string }) => d)
+	.handler(async ({ data }) => {
+		const sessionToken = await requireAdminToken();
+		const client = getGrpcClient();
+
+		const { response } = await client.admin.unbanUser({
+			sessionToken,
+			userId: data.userId,
+		});
+
+		return response;
+	});
+
+export const updateUserRoleFn = createServerFn({ method: "POST" })
+	.inputValidator((d: { userId: string; role: string }) => d)
+	.handler(async ({ data }) => {
+		const sessionToken = await requireAdminToken();
+		const client = getGrpcClient();
+
+		const { response } = await client.admin.updateUserRole({
+			sessionToken,
+			userId: data.userId,
+			role: data.role,
+		});
+
+		return response;
+	});
+

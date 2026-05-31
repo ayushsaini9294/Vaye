@@ -3,6 +3,9 @@ import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Header } from "../components/layout/Header";
 import { MobileNav } from "../components/layout/MobileNav";
 import { KeyboardShortcutsHelp } from "../components/shared/KeyboardShortcutsHelp";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 import appCss from "../styles.css?url";
 
@@ -37,10 +40,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				`}</style>
 			</head>
 			<body>
-				<Header />
-				{children}
-				<MobileNav />
-				<KeyboardShortcutsHelp />
+				<QueryClientProvider client={queryClient}>
+					<Header />
+					{children}
+					<MobileNav />
+					<KeyboardShortcutsHelp />
+				</QueryClientProvider>
 				<Scripts />
 			</body>
 		</html>

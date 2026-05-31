@@ -59,9 +59,18 @@ export const searchUsers = createServerFn()
 
 		const client = getGrpcClient();
 
-		const { response } = await client.search.searchUsers({
-			query,
-		});
-
-		return response.users.map(mapUserSearchResult);
+		try {
+			console.log("[searchUsers] Calling gRPC with query:", query);
+			const { response } = await client.search.searchUsers({
+				query,
+			});
+			console.log("[searchUsers] Raw response:", JSON.stringify(response));
+			console.log("[searchUsers] Users count:", response.users.length);
+			const mapped = response.users.map(mapUserSearchResult);
+			console.log("[searchUsers] Mapped results:", JSON.stringify(mapped));
+			return mapped;
+		} catch (error) {
+			console.error("[searchUsers] gRPC call FAILED:", error);
+			throw error;
+		}
 	});

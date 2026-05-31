@@ -18,11 +18,17 @@ const styles = stylex.create({
 		alignItems: "center",
 		justifyContent: "center",
 		border: "none",
-		cursor: "pointer",
+		cursor: "grab",
 		boxShadow: shadows.lg,
 		zIndex: 99999,
 		transition: "transform 0.2s",
+		touchAction: "none",
 		":hover": { transform: "scale(1.1)" },
+	},
+	triggerDragging: {
+		cursor: "grabbing",
+		transform: "scale(1.05)",
+		transition: "none",
 	},
 	overlay: {
 		position: "fixed",
@@ -120,6 +126,10 @@ const SHORTCUTS = [
 
 export function KeyboardShortcutsHelp() {
 	const [open, setOpen] = useState(false);
+	const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+	const [dragging, setDragging] = useState(false);
+	const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+	const [hasMoved, setHasMoved] = useState(false);
 
 	const toggle = useCallback(() => setOpen((v) => !v), []);
 
@@ -134,12 +144,72 @@ export function KeyboardShortcutsHelp() {
 		return () => window.removeEventListener("keydown", handler);
 	}, []);
 
+	const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+		if (e.button !== 0) return; // Only left click / tap dragging
+		const rect = e.currentTarget.getBoundingClientRect();
+		setDragStart({
+			x: e.clientX - rect.left,
+			y: e.clientY - rect.top,
+		});
+		setDragging(true);
+		setHasMoved(false);
+		e.currentTarget.setPointerCapture(e.pointerId);
+	};
+
+	const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+		if (!dragging) return;
+		
+		const nextX = e.clientX - dragStart.x;
+		const nextY = e.clientY - dragStart.y;
+		
+		// If pointer moves more than 4px, classify it as dragging instead of static clicking
+		const rect = e.currentTarget.getBoundingClientRect();
+		const currentX = rect.left;
+		const currentY = rect.top;
+		const distance = Math.sqrt((nextX - currentX) ** 2 + (nextY - currentY) ** 2);
+		if (distance > 4) {
+			setHasMoved(true);
+		}
+		
+		// Keep within viewport safety margins
+		const buttonSize = 40; 
+		const padding = 16;
+		const x = Math.max(padding, Math.min(window.innerWidth - buttonSize - padding, nextX));
+		const y = Math.max(padding, Math.min(window.innerHeight - buttonSize - padding, nextY));
+		
+		setPosition({ x, y });
+	};
+
+	const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+		if (!dragging) return;
+		setDragging(false);
+		e.currentTarget.releasePointerCapture(e.pointerId);
+	};
+
+	const handleClick = (e: React.MouseEvent) => {
+		if (hasMoved) {
+			e.preventDefault();
+			e.stopPropagation();
+		} else {
+			toggle();
+		}
+	};
+
 	return (
 		<>
 			<button
 				type="button"
-				onClick={toggle}
-				{...stylex.props(styles.trigger)}
+				onPointerDown={handlePointerDown}
+				onPointerMove={handlePointerMove}
+				onPointerUp={handlePointerUp}
+				onClick={handleClick}
+				{...stylex.props(styles.trigger, dragging && styles.triggerDragging)}
+				style={position ? {
+					left: `${position.x}px`,
+					top: `${position.y}px`,
+					right: "auto",
+					bottom: "auto",
+				} : undefined}
 				aria-label="Keyboard shortcuts"
 				data-testid="shortcuts-trigger"
 				title="Keyboard shortcuts (?)"

@@ -150,6 +150,39 @@ export const auditLogs = sqliteTable("audit_logs", {
 	createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
 });
 
+// Conversations table
+export const conversations = sqliteTable(
+	"conversations",
+	{
+		id: text("id").primaryKey(),
+		user1Id: text("user1_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		user2Id: text("user2_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+		updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+	},
+	(table) => ({
+		uniqueConversation: unique("unique_conversation").on(table.user1Id, table.user2Id),
+	}),
+);
+
+// Messages table
+export const messages = sqliteTable("messages", {
+	id: text("id").primaryKey(),
+	conversationId: text("conversation_id")
+		.notNull()
+		.references(() => conversations.id, { onDelete: "cascade" }),
+	senderId: text("sender_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	content: text("content").notNull(),
+	read: integer("read", { mode: "boolean" }).notNull().default(false),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`(unixepoch())`),
+});
+
 // Export types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -169,6 +202,10 @@ export type Report = typeof reports.$inferSelect;
 export type InsertReport = typeof reports.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type InsertAuditLog = typeof auditLogs.$inferInsert;
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = typeof conversations.$inferInsert;
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = typeof messages.$inferInsert;
 
 // Role type
 export type UserRole = "user" | "admin" | "moderator";

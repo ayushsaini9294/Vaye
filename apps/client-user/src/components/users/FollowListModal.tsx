@@ -173,20 +173,36 @@ export function FollowListModal({ username, type, onClose }: FollowListModalProp
 						</div>
 					) : (
 						users.map((user) => (
-							<Link
-								key={user.id}
-								to="/users/$username"
-								params={{ username: user.username }}
-								onClick={onClose}
-								{...stylex.props(styles.userCard)}
-							>
-								<UserAvatar avatarUrl={user.avatarUrl} username={user.username} size="md" />
-								<div {...stylex.props(styles.userInfo)}>
-									<div {...stylex.props(styles.displayName)}>{user.displayName}</div>
-									<div {...stylex.props(styles.username)}>@{user.username}</div>
-									{user.bio && <div {...stylex.props(styles.bio)}>{user.bio}</div>}
-								</div>
-							</Link>
+							<div key={user.id} {...stylex.props(styles.userCard)}>
+								<Link
+									to="/users/$username"
+									params={{ username: user.username }}
+									onClick={onClose}
+									style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, textDecoration: "none", color: "inherit" }}
+								>
+									<UserAvatar avatarUrl={user.avatarUrl} username={user.username} size="md" />
+									<div {...stylex.props(styles.userInfo)}>
+										<div {...stylex.props(styles.displayName)}>{user.displayName}</div>
+										<div {...stylex.props(styles.username)}>@{user.username}</div>
+										{user.bio && <div {...stylex.props(styles.bio)}>{user.bio}</div>}
+									</div>
+								</Link>
+								<Link
+									to="/messages/$username"
+									params={{ username: user.username }}
+									style={{
+										padding: "6px 12px",
+										borderRadius: "6px",
+										backgroundColor: "#e5e7eb",
+										color: "#111827",
+										textDecoration: "none",
+										fontWeight: 500,
+										fontSize: "12px",
+									}}
+								>
+									Message
+								</Link>
+							</div>
 						))
 					)}
 				</div>

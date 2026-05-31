@@ -1,5 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { FileText, Users, UserX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PostList } from "../../components/posts/PostList";
@@ -250,7 +250,26 @@ function UserProfilePage() {
 							<UserAvatar avatarUrl={user.avatarUrl} username={user.username} size="lg" />
 						</div>
 						<div>
-							{!isOwnProfile && currentUser && <FollowButton username={username} />}
+							{!isOwnProfile && currentUser && (
+								<div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+									<FollowButton username={username} />
+									<Link
+										to="/messages/$username"
+										params={{ username }}
+										style={{
+											padding: "8px 16px",
+											borderRadius: "6px",
+											backgroundColor: "#e5e7eb",
+											color: "#111827",
+											textDecoration: "none",
+											fontWeight: 500,
+											fontSize: "14px",
+										}}
+									>
+										Message
+									</Link>
+								</div>
+							)}
 							{isOwnProfile && (
 								<button
 									type="button"

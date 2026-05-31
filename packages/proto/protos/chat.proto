@@ -1,0 +1,69 @@
+syntax = "proto3";
+package vaye.chat;
+
+import "common.proto";
+
+message ConversationResponse {
+  string id = 1;
+  vaye.common.Author other_user = 2;
+  optional MessageResponse last_message = 3;
+  int32 unread_count = 4;
+  vaye.common.Timestamp updated_at = 5;
+}
+
+message MessageResponse {
+  string id = 1;
+  string conversation_id = 2;
+  string sender_id = 3;
+  string content = 4;
+  bool read = 5;
+  vaye.common.Timestamp created_at = 6;
+}
+
+message GetConversationsRequest {
+  string session_token = 1;
+  optional vaye.common.PaginationRequest pagination = 2;
+}
+
+message GetConversationsResponse {
+  repeated ConversationResponse conversations = 1;
+}
+
+message GetMessagesRequest {
+  string session_token = 1;
+  string conversation_id = 2;
+  optional vaye.common.PaginationRequest pagination = 3;
+}
+
+message GetMessagesResponse {
+  repeated MessageResponse messages = 1;
+}
+
+message SendMessageRequest {
+  string session_token = 1;
+  string receiver_username = 2; // Can be username to make it easier to start from profile
+  string content = 3;
+}
+
+message SendMessageResponse {
+  bool success = 1;
+  string error = 2;
+  optional MessageResponse message = 3;
+}
+
+message MarkConversationAsReadRequest {
+  string session_token = 1;
+  string conversation_id = 2;
+}
+
+message MarkConversationAsReadResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+service ChatService {
+  rpc GetConversations(GetConversationsRequest) returns (GetConversationsResponse);
+  rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc MarkAsRead(MarkConversationAsReadRequest) returns (MarkConversationAsReadResponse);
+}

@@ -2,6 +2,7 @@ import {
 	AdminServiceClient,
 	AuthServiceClient,
 	BookmarksServiceClient,
+	ChatServiceClient,
 	CommentsServiceClient,
 	FeedServiceClient,
 	FollowsServiceClient,
@@ -31,6 +32,7 @@ export interface VayeClient {
 	admin: AdminServiceClient;
 	notifications: NotificationsServiceClient;
 	bookmarks: BookmarksServiceClient;
+	chat: ChatServiceClient;
 	transport: GrpcTransport;
 }
 
@@ -61,6 +63,7 @@ export function createVayeClient(config: VayeClientConfig): VayeClient {
 		admin: new AdminServiceClient(transport),
 		notifications: new NotificationsServiceClient(transport),
 		bookmarks: new BookmarksServiceClient(transport),
+		chat: new ChatServiceClient(transport),
 		transport,
 	};
 }

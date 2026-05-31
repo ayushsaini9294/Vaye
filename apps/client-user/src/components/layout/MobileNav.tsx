@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import { Link, useLocation } from "@tanstack/react-router";
-import { Bell, Bookmark, Compass, Home, Search } from "lucide-react";
+import { Bell, Bookmark, Compass, Home, Search, MessageSquare } from "lucide-react";
 import { colors, semanticColors, spacing, zIndex } from "../../tokens.stylex";
 
 const styles = stylex.create({
@@ -71,6 +71,10 @@ export function MobileNav() {
 			<Link to="/bookmarks" {...stylex.props(styles.navLink, isActive("/bookmarks") && styles.navLinkActive)}>
 				<Bookmark size={22} />
 				<span {...stylex.props(styles.navLabel)}>Saved</span>
+			</Link>
+			<Link to="/messages" {...stylex.props(styles.navLink, isActive("/messages") && styles.navLinkActive)}>
+				<MessageSquare size={22} />
+				<span {...stylex.props(styles.navLabel)}>Chat</span>
 			</Link>
 		</nav>
 	);

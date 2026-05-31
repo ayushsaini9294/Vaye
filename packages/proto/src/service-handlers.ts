@@ -8,6 +8,15 @@ import type {
 	BanUserResponse,
 	BookmarkResponse,
 	BookmarkStatusResponse,
+	// Chat
+	GetConversationsRequest,
+	GetConversationsResponse,
+	GetMessagesRequest,
+	GetMessagesResponse,
+	SendMessageRequest,
+	SendMessageResponse,
+	MarkConversationAsReadRequest,
+	MarkConversationAsReadResponse,
 	CommentsResponse,
 	CountResponse,
 	// Comments
@@ -198,4 +207,12 @@ export interface IBookmarksService {
 	toggleBookmark(request: ToggleBookmarkRequest): Promise<BookmarkResponse>;
 	getBookmarkStatus(request: GetBookmarkStatusRequest): Promise<BookmarkStatusResponse>;
 	getBookmarkedPosts(request: GetBookmarkedPostsRequest): Promise<PostsResponse>;
+}
+
+// Chat Service Handler
+export interface IChatService {
+	getConversations(request: GetConversationsRequest): Promise<GetConversationsResponse>;
+	getMessages(request: GetMessagesRequest): Promise<GetMessagesResponse>;
+	sendMessage(request: SendMessageRequest): Promise<SendMessageResponse>;
+	markAsRead(request: MarkConversationAsReadRequest): Promise<MarkConversationAsReadResponse>;
 }

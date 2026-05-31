@@ -245,6 +245,7 @@ function SearchPage() {
 	const [tab, setTab] = useState<"posts" | "users">("posts");
 	const [loading, setLoading] = useState(false);
 	const [hasSearched, setHasSearched] = useState(false);
+	const [searchError, setSearchError] = useState<string | null>(null);
 
 	useEffect(() => {
 		getCurrentUser().then(setUser);
@@ -255,15 +256,26 @@ function SearchPage() {
 
 		setLoading(true);
 		setHasSearched(true);
+		setSearchError(null);
 		try {
+			console.log("Searching for:", query);
 			const [postsResults, usersResults] = await Promise.all([
 				searchPosts({ data: query }),
 				searchUsers({ data: query }),
 			]);
+			console.log("Posts results:", postsResults.length, "Users results:", usersResults.length);
 			setPosts(postsResults);
 			setUsers(usersResults);
+			// Smart auto-switch: go to the tab that has results
+			if (postsResults.length > 0) {
+				setTab("posts");
+			} else if (usersResults.length > 0) {
+				setTab("users");
+			}
+			// If both empty, keep current tab — user can switch manually
 		} catch (error) {
 			console.error("Search failed:", error);
+			setSearchError(error instanceof Error ? error.message : "Search failed. Please try again.");
 		} finally {
 			setLoading(false);
 		}
@@ -311,7 +323,7 @@ function SearchPage() {
 						{...stylex.props(styles.tab, tab === "posts" ? styles.tabActive : styles.tabInactive)}
 					>
 						<FileText size={20} />
-						Posts
+						Posts{hasSearched && posts.length > 0 ? ` (${posts.length})` : ""}
 					</button>
 					<button
 						type="button"
@@ -319,10 +331,17 @@ function SearchPage() {
 						{...stylex.props(styles.tab, tab === "users" ? styles.tabActive : styles.tabInactive)}
 					>
 						<Users size={20} />
-						Users
+						Users{hasSearched && users.length > 0 ? ` (${users.length})` : ""}
 					</button>
 				</div>
 			</div>
+
+			{/* Error banner */}
+			{searchError && (
+				<div style={{ background: "#fee2e2", color: "#dc2626", padding: "1rem", borderRadius: "0.75rem", marginBottom: "1rem", fontSize: "0.875rem" }}>
+					⚠️ {searchError}
+				</div>
+			)}
 
 			{/* Results */}
 			{loading ? (

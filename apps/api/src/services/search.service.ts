@@ -74,7 +74,7 @@ export async function searchUsers(query: string) {
 		return [];
 	}
 
-	const searchPattern = `%${query}%`;
+	const searchPattern = `%${query.toLowerCase()}%`;
 
 	const result = await db
 		.select({
@@ -85,7 +85,12 @@ export async function searchUsers(query: string) {
 			bio: users.bio,
 		})
 		.from(users)
-		.where(or(like(users.username, searchPattern), like(users.displayName, searchPattern)))
+		.where(
+			or(
+				sql`LOWER(${users.username}) LIKE ${searchPattern}`,
+				sql`LOWER(${users.displayName}) LIKE ${searchPattern}`
+			)
+		)
 		.limit(20);
 
 	return result;

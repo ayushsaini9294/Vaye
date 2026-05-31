@@ -53,6 +53,8 @@ pnpm run dev
 - **Likes** - Like/unlike posts and comments
 - **User Profiles** - View profiles, edit own profile (name, bio, avatar)
 - **Follow System** - Follow/unfollow users, follower/following counts
+- **Direct Messaging (Chat)** - Premium Twitter/X-style chat sidebar, grouped message bubbles, smart rounded corners, read receipts, and modern auto-focus text inputs
+- **Moveable Shortcuts Trigger** - Draggable keyboard shortcuts button with pointer-based collision controls that preserves viewport accessibility and prevents input occlusion
 
 #### Feed & Discovery
 - **Home Feed** - Posts from followed users
@@ -63,6 +65,11 @@ pnpm run dev
 - **Bookmarks** - Save posts for later, dedicated bookmarks page
 - **Notifications** - Alerts for likes, comments, follows, and mentions
 - **Mentions** - @username linking in posts and comments
+
+### Admin Application
+
+- **Live Moderation Dashboard** - View all platform statistics, recent posts, audit logs, and reports
+- **User Management** - Direct gRPC-connected controls to modify user roles, ban/unban violators, and view dynamic user audit histories
 
 
 
