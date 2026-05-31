@@ -328,7 +328,7 @@ function MessagesLayout() {
 							<Link
 								key={conv.id}
 								to="/messages/$username"
-								params={{ username: conv.otherUser!.username }}
+								params={{ username: conv.otherUser?.username }}
 								{...stylex.props(styles.conversationItem)}
 								activeProps={{
 									...stylex.props(styles.conversationItemActive),
@@ -336,14 +336,14 @@ function MessagesLayout() {
 							>
 								<div {...stylex.props(styles.avatarWrapper)}>
 									<UserAvatar
-										avatarUrl={conv.otherUser!.avatarUrl || undefined}
-										username={conv.otherUser!.username}
+										avatarUrl={conv.otherUser?.avatarUrl || undefined}
+										username={conv.otherUser?.username}
 										size="md"
 									/>
 								</div>
 								<div {...stylex.props(styles.conversationContent)}>
 									<div {...stylex.props(styles.conversationHeader)}>
-										<span {...stylex.props(styles.displayName)}>{conv.otherUser!.displayName}</span>
+										<span {...stylex.props(styles.displayName)}>{conv.otherUser?.displayName}</span>
 										{conv.lastMessage && (
 											<span {...stylex.props(styles.time)}>{formatTime(conv.updatedAt)}</span>
 										)}

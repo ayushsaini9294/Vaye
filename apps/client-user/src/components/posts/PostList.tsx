@@ -97,10 +97,6 @@ export function PostList({
 	currentUserId?: string;
 	onPostDelete?: () => void;
 }) {
-	if (loading) {
-		return <SkeletonFeed count={3} />;
-	}
-
 	const [focusedIndex, setFocusedIndex] = useState(-1);
 	const postRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -127,6 +123,10 @@ export function PostList({
 			postRefs.current[focusedIndex]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
 		}
 	}, [focusedIndex]);
+
+	if (loading) {
+		return <SkeletonFeed count={3} />;
+	}
 
 	if (posts.length === 0) {
 		return (

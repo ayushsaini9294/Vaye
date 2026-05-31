@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getFollowersFn, getFollowingFn } from "../../server/functions/follows";
 import { fontSize, fontWeight, radii, semanticColors, shadows, spacing } from "../../tokens.stylex";
 import { LoadingSpinner } from "../shared/LoadingSpinner";
@@ -131,11 +131,7 @@ export function FollowListModal({ username, type, onClose }: FollowListModalProp
 	const [users, setUsers] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		loadData();
-	}, [username, type]);
-
-	const loadData = async () => {
+	const loadData = useCallback(async () => {
 		try {
 			setLoading(true);
 			if (type === "followers") {
@@ -150,11 +146,32 @@ export function FollowListModal({ username, type, onClose }: FollowListModalProp
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [username, type]);
+
+	useEffect(() => {
+		loadData();
+	}, [loadData]);
 
 	return (
-		<div {...stylex.props(styles.overlay)} onClick={onClose}>
-			<div {...stylex.props(styles.modal)} onClick={(e) => e.stopPropagation()}>
+		<div {...stylex.props(styles.overlay)}>
+			<button
+				type="button"
+				aria-label="Close"
+				onClick={onClose}
+				style={{
+					position: "absolute",
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					background: "transparent",
+					border: "none",
+					width: "100%",
+					height: "100%",
+					cursor: "default",
+				}}
+			/>
+			<div {...stylex.props(styles.modal)} style={{ position: "relative", zIndex: 1 }}>
 				<div {...stylex.props(styles.header)}>
 					<h2 {...stylex.props(styles.title)}>
 						{type === "followers" ? "Followers" : "Following"}

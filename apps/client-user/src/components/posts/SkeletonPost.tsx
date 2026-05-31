@@ -62,11 +62,13 @@ export function SkeletonPost() {
 	);
 }
 
+const SKELETON_KEYS = Array.from({ length: 20 }, (_, idx) => `skeleton-post-${idx}`);
+
 export function SkeletonFeed({ count = 3 }: { count?: number }) {
 	return (
 		<div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-			{Array.from({ length: count }).map((_, i) => (
-				<SkeletonPost key={i} />
+			{SKELETON_KEYS.slice(0, count).map((itemKey) => (
+				<SkeletonPost key={itemKey} />
 			))}
 		</div>
 	);

@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { FileText, Users, UserX } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PostList } from "../../components/posts/PostList";
 import { LoadingSpinner } from "../../components/shared/LoadingSpinner";
 import { FollowButton } from "../../components/users/FollowButton";
@@ -179,11 +179,7 @@ function UserProfilePage() {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [followListType, setFollowListType] = useState<"followers" | "following" | null>(null);
 
-	useEffect(() => {
-		loadData();
-	}, [username]);
-
-	const loadData = async () => {
+	const loadData = useCallback(async () => {
 		try {
 			const [profileUser, userPosts, revayeedPosts, currentU, followers, following] =
 				await Promise.all([
@@ -210,7 +206,11 @@ function UserProfilePage() {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [username]);
+
+	useEffect(() => {
+		loadData();
+	}, [loadData]);
 
 	if (loading) {
 		return (

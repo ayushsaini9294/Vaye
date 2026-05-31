@@ -200,8 +200,25 @@ export function EditProfileModal({ user, onClose, onSuccess }: EditProfileModalP
 	};
 
 	return (
-		<div {...stylex.props(styles.overlay)} onClick={onClose}>
-			<div {...stylex.props(styles.modal)} onClick={(e) => e.stopPropagation()}>
+		<div {...stylex.props(styles.overlay)}>
+			<button
+				type="button"
+				aria-label="Close"
+				onClick={onClose}
+				style={{
+					position: "absolute",
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					background: "transparent",
+					border: "none",
+					width: "100%",
+					height: "100%",
+					cursor: "default",
+				}}
+			/>
+			<div {...stylex.props(styles.modal)} style={{ position: "relative", zIndex: 1 }}>
 				<div {...stylex.props(styles.header)}>
 					<h2 {...stylex.props(styles.title)}>Edit Profile</h2>
 					<button type="button" onClick={onClose} {...stylex.props(styles.closeButton)}>

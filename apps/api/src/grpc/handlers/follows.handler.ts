@@ -76,7 +76,7 @@ export const followsHandler: IFollowsService = {
 				})),
 				total: result.total,
 			};
-		} catch (error) {
+		} catch (_error) {
 			return { users: [], total: 0 };
 		}
 	},
@@ -100,7 +100,7 @@ export const followsHandler: IFollowsService = {
 				})),
 				total: result.total,
 			};
-		} catch (error) {
+		} catch (_error) {
 			return { users: [], total: 0 };
 		}
 	},

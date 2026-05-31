@@ -27,13 +27,9 @@ export function ParsedContent({ content }: ParsedContentProps) {
 	const mentionPattern = /@([a-zA-Z0-9_]+)/g;
 	const parts: (string | ReactNode)[] = [];
 	let lastIndex = 0;
-	let match: RegExpExecArray | null;
 	let key = 0;
-
-	// Reset regex state
-	mentionPattern.lastIndex = 0;
-
-	while ((match = mentionPattern.exec(content)) !== null) {
+	let match = mentionPattern.exec(content);
+	while (match !== null) {
 		// Add text before mention
 		if (match.index > lastIndex) {
 			parts.push(content.slice(lastIndex, match.index));
@@ -54,6 +50,7 @@ export function ParsedContent({ content }: ParsedContentProps) {
 		);
 
 		lastIndex = match.index + match[0].length;
+		match = mentionPattern.exec(content);
 	}
 
 	// Add remaining text

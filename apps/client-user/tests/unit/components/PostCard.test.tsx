@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { PostCard } from "../../../src/components/posts/PostCard";
 
 // Mock the server functions
 vi.mock("../../../src/server/functions/likes", () => ({
@@ -39,33 +40,26 @@ const mockPost = {
 };
 
 describe("PostCard", () => {
-	it("renders post content correctly", async () => {
-		const { PostCard } = await import("../../../src/components/posts/PostCard");
+	it("renders post content correctly", () => {
 		render(<PostCard post={mockPost} />);
 		expect(screen.getByText("Test post content")).toBeInTheDocument();
 		expect(screen.getByText("Test User")).toBeInTheDocument();
 		expect(screen.getByText("@testuser")).toBeInTheDocument();
 	});
 
-	it("displays like and comment counts", async () => {
-		const { PostCard } = await import("../../../src/components/posts/PostCard");
+	it("displays like and comment counts", () => {
 		render(<PostCard post={mockPost} />);
-		const likeBtn = screen.getByRole("button", { name: /5/ });
-		const commentLnk = screen.getByRole("link", { name: /3/ });
-		expect(likeBtn).toBeInTheDocument();
-		expect(commentLnk).toBeInTheDocument();
+		expect(screen.getByText("5")).toBeInTheDocument();
+		expect(screen.getByText("3")).toBeInTheDocument();
 	});
 
-	it("shows delete button for own posts", async () => {
-		const { PostCard } = await import("../../../src/components/posts/PostCard");
+	it("shows delete button for own posts", () => {
 		render(<PostCard post={mockPost} currentUserId="user1" />);
-		const buttons = screen.getAllByRole("button");
-		// Should have at least like button and delete button
-		expect(buttons.length).toBeGreaterThan(0);
+		const deleteBtn = screen.getByTitle("Delete post");
+		expect(deleteBtn).toBeInTheDocument();
 	});
 
-	it("shows edited indicator when post is edited", async () => {
-		const { PostCard } = await import("../../../src/components/posts/PostCard");
+	it("shows edited indicator when post is edited", () => {
 		const editedPost = {
 			...mockPost,
 			updatedAt: new Date("2024-01-01T11:00:00Z"),

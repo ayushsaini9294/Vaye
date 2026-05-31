@@ -247,17 +247,20 @@ export function PostForm({ onSuccess }: { onSuccess?: () => void }) {
 		if (mentionRef.current?.handleKeyDown(e)) return;
 	};
 
-	const handleSelect = useCallback((newText: string, newCursorPos: number) => {
-		setContent(newText);
-		setCursorPos(newCursorPos);
-		saveDraft(newText, showCw ? cwText : "");
-		requestAnimationFrame(() => {
-			const el = textareaRef.current;
-			if (!el) return;
-			el.setSelectionRange(newCursorPos, newCursorPos);
-			el.focus();
-		});
-	}, []);
+	const handleSelect = useCallback(
+		(newText: string, newCursorPos: number) => {
+			setContent(newText);
+			setCursorPos(newCursorPos);
+			saveDraft(newText, showCw ? cwText : "");
+			requestAnimationFrame(() => {
+				const el = textareaRef.current;
+				if (!el) return;
+				el.setSelectionRange(newCursorPos, newCursorPos);
+				el.focus();
+			});
+		},
+		[cwText, showCw],
+	);
 
 	return (
 		<form onSubmit={handleSubmit} {...stylex.props(styles.form)} data-testid="post-form">

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertCircle, ArrowLeft, MessageCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CommentCard } from "../../components/comments/CommentCard";
 import { CommentForm } from "../../components/comments/CommentForm";
 import { PostCard } from "../../components/posts/PostCard";
@@ -20,11 +20,7 @@ function PostPage() {
 	const [user, setUser] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		loadData();
-	}, [postId]);
-
-	const loadData = async () => {
+	const loadData = useCallback(async () => {
 		try {
 			const [currentUser, postData, commentsData] = await Promise.all([
 				getCurrentUser(),
@@ -39,7 +35,11 @@ function PostPage() {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [postId]);
+
+	useEffect(() => {
+		loadData();
+	}, [loadData]);
 
 	if (loading) {
 		return (

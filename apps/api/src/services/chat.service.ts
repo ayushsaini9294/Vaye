@@ -181,12 +181,12 @@ export async function sendMessage(senderId: string, receiverUsername: string, co
 	const [msg] = await db.select().from(messages).where(eq(messages.id, messageId)).limit(1);
 
 	return {
-		id: msg!.id,
-		conversationId: msg!.conversationId,
-		senderId: msg!.senderId,
-		content: msg!.content,
-		read: msg!.read,
-		createdAt: toProtoTimestamp(msg!.createdAt),
+		id: msg?.id,
+		conversationId: msg?.conversationId,
+		senderId: msg?.senderId,
+		content: msg?.content,
+		read: msg?.read,
+		createdAt: toProtoTimestamp(msg?.createdAt),
 	};
 }
 

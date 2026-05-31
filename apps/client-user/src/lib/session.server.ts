@@ -36,7 +36,7 @@ export async function getSessionData(): Promise<SessionData | null> {
 			return JSON.parse(cookieValue.substring(2));
 		}
 		return JSON.parse(cookieValue);
-	} catch (error) {
+	} catch (_error) {
 		return null;
 	}
 }
@@ -47,7 +47,7 @@ export async function setSessionData(data: SessionData): Promise<void> {
 		// We use a simple JSON string prefixed with j: which is a common convention
 		// and might be enough to trick the rest of the system if needed.
 		// For E2E tests, this should be fine.
-		setCookie(SESSION_CONFIG.name, "j:" + JSON.stringify(data), SESSION_CONFIG.cookie);
+		setCookie(SESSION_CONFIG.name, `j:${JSON.stringify(data)}`, SESSION_CONFIG.cookie);
 	} catch (error) {
 		console.error("Failed to set session data:", error);
 	}

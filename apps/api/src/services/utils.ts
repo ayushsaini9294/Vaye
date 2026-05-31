@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 
 /**
  * Generate a simple ID
@@ -12,7 +12,7 @@ export function generateId(): string {
  */
 export async function hashPassword(password: string): Promise<string> {
 	const hash = createHash("sha256");
-	hash.update(password + "salt");
+	hash.update(`${password}salt`);
 	return hash.digest("hex");
 }
 

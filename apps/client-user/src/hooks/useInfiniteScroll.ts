@@ -64,7 +64,7 @@ export function useInfiniteScroll<T>(
 			cancelled = true;
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [key]);
+	}, [fetchPage]);
 
 	// IntersectionObserver on sentinel
 	useEffect(() => {

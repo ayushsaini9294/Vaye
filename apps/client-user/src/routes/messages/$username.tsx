@@ -326,7 +326,7 @@ function ChatView() {
 
 	const { data: messages } = useQuery({
 		queryKey: ["messages", conversation?.id],
-		queryFn: () => getMessages({ data: { conversationId: conversation!.id } }),
+		queryFn: () => getMessages({ data: { conversationId: conversation?.id } }),
 		enabled: !!conversation?.id,
 		refetchInterval: 3000,
 	});
@@ -342,16 +342,16 @@ function ChatView() {
 		if (conversation?.id && conversation.unreadCount > 0) {
 			markAsReadMutation.mutate({ data: conversation.id });
 		}
-	}, [conversation?.id, conversation?.unreadCount]);
+	}, [conversation?.id, conversation?.unreadCount, markAsReadMutation.mutate]);
 
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	}, [messages]);
+	}, []);
 
 	// Focus input on mount
 	useEffect(() => {
 		inputRef.current?.focus();
-	}, [username]);
+	}, []);
 
 	const sendMutation = useMutation({
 		mutationFn: sendMessage,

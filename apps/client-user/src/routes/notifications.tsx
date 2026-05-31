@@ -1,7 +1,7 @@
 import * as stylex from "@stylexjs/stylex";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bell, CheckCheck, Inbox } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NotificationItem } from "../components/notifications/NotificationItem";
 import { getCurrentUser } from "../server/functions/auth";
 import { getNotifications, markAllAsRead } from "../server/functions/notifications";
@@ -134,11 +134,7 @@ function NotificationsPage() {
 	const [loading, setLoading] = useState(true);
 	const [markingAll, setMarkingAll] = useState(false);
 
-	useEffect(() => {
-		loadData();
-	}, []);
-
-	const loadData = async () => {
+	const loadData = useCallback(async () => {
 		try {
 			const currentUser = await getCurrentUser();
 			setUser(currentUser);
@@ -152,7 +148,11 @@ function NotificationsPage() {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, []);
+
+	useEffect(() => {
+		loadData();
+	}, [loadData]);
 
 	const handleMarkAllAsRead = async () => {
 		if (markingAll) return;

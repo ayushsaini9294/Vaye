@@ -160,7 +160,7 @@ export const MentionAutocomplete = forwardRef<MentionAutocompleteHandle, Mention
 		// Reset dismissed when mention query changes
 		useEffect(() => {
 			setDismissed(false);
-		}, [mention?.query]);
+		}, []);
 
 		// Fetch matching users
 		useEffect(() => {
@@ -186,7 +186,7 @@ export const MentionAutocomplete = forwardRef<MentionAutocompleteHandle, Mention
 			return () => {
 				if (debounceRef.current) clearTimeout(debounceRef.current);
 			};
-		}, [mention?.query]);
+		}, [mention?.query, mention]);
 
 		// Scroll active item into view
 		useEffect(() => {
@@ -267,19 +267,15 @@ export const MentionAutocomplete = forwardRef<MentionAutocompleteHandle, Mention
 				) : (
 					<ul
 						ref={listRef}
-						role="listbox"
 						{...stylex.props(styles.list)}
 						style={{ listStyle: "none", margin: 0, padding: 0 }}
 					>
 						{users.map((user, idx) => (
-							<li
-								key={user.id}
-								role="option"
-								aria-selected={idx === activeIndex}
-								data-testid="mention-option"
-							>
+							<li key={user.id} data-testid="mention-option">
 								<button
 									type="button"
+									role="option"
+									aria-selected={idx === activeIndex}
 									onMouseDown={(e) => {
 										e.preventDefault();
 										confirmSelectionRef.current(user);

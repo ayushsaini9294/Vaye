@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import { Repeat2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getRevayeStatus, toggleRevaye } from "../../server/functions/revayes";
 import { colors, radii, semanticColors, spacing } from "../../tokens.stylex";
 
@@ -75,12 +75,7 @@ export function RevayeButton({
 	const [loading, setLoading] = useState(false);
 	const [animateSpin, setAnimateSpin] = useState(false);
 
-	useEffect(() => {
-		if (isOwnPost) return;
-		loadStatus();
-	}, [postId, isOwnPost]);
-
-	const loadStatus = async () => {
+	const loadStatus = useCallback(async () => {
 		try {
 			const status = await getRevayeStatus({ data: postId });
 			setRevayeed(status.revayeed);
@@ -88,7 +83,12 @@ export function RevayeButton({
 		} catch {
 			// user may not be logged in — silently ignore
 		}
-	};
+	}, [postId]);
+
+	useEffect(() => {
+		if (isOwnPost) return;
+		loadStatus();
+	}, [isOwnPost, loadStatus]);
 
 	const handleToggle = async () => {
 		if (loading || isOwnPost) return;
