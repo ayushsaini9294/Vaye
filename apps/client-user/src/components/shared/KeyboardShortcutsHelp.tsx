@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import { Keyboard, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import { colors, radii, semanticColors, shadows, spacing } from "../../tokens.stylex";
 
@@ -137,14 +137,15 @@ export function KeyboardShortcutsHelp() {
 	const [open, setOpen] = useState(false);
 	const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
 	const [dragging, setDragging] = useState(false);
-	const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 	const [hasMoved, setHasMoved] = useState(false);
+
+	const dragStartOffset = useRef({ x: 0, y: 0 });
+	const dragStartPos = useRef({ x: 0, y: 0 });
 
 	const toggle = useCallback(() => setOpen((v) => !v), []);
 
 	useKeyboardShortcuts([{ key: "?", description: "Show keyboard shortcuts", action: toggle }]);
 
-	// Close on Escape
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
 			if (e.key === "Escape") setOpen(false);
@@ -154,12 +155,18 @@ export function KeyboardShortcutsHelp() {
 	}, []);
 
 	const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-		if (e.button !== 0) return; // Only left click / tap dragging
+		if (e.button !== 0) return;
 		const rect = e.currentTarget.getBoundingClientRect();
-		setDragStart({
+
+		dragStartOffset.current = {
 			x: e.clientX - rect.left,
 			y: e.clientY - rect.top,
-		});
+		};
+		dragStartPos.current = {
+			x: e.clientX,
+			y: e.clientY,
+		};
+
 		setDragging(true);
 		setHasMoved(false);
 		e.currentTarget.setPointerCapture(e.pointerId);
@@ -168,19 +175,16 @@ export function KeyboardShortcutsHelp() {
 	const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
 		if (!dragging) return;
 
-		const nextX = e.clientX - dragStart.x;
-		const nextY = e.clientY - dragStart.y;
-
-		// If pointer moves more than 4px, classify it as dragging instead of static clicking
-		const rect = e.currentTarget.getBoundingClientRect();
-		const currentX = rect.left;
-		const currentY = rect.top;
-		const distance = Math.sqrt((nextX - currentX) ** 2 + (nextY - currentY) ** 2);
-		if (distance > 4) {
+		const dx = e.clientX - dragStartPos.current.x;
+		const dy = e.clientY - dragStartPos.current.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+		if (distance > 6) {
 			setHasMoved(true);
 		}
 
-		// Keep within viewport safety margins
+		const nextX = e.clientX - dragStartOffset.current.x;
+		const nextY = e.clientY - dragStartOffset.current.y;
+
 		const buttonSize = 40;
 		const padding = 16;
 		const x = Math.max(padding, Math.min(window.innerWidth - buttonSize - padding, nextX));
@@ -235,6 +239,9 @@ export function KeyboardShortcutsHelp() {
 					{...stylex.props(styles.overlay)}
 					onClick={(e) => {
 						if (e.target === e.currentTarget) setOpen(false);
+					}}
+					onKeyDown={(e) => {
+						if (e.key === "Escape") setOpen(false);
 					}}
 					data-testid="shortcuts-overlay"
 					role="dialog"
