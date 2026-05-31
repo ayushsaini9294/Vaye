@@ -1,9 +1,9 @@
 import * as stylex from "@stylexjs/stylex";
 import { FileText } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import { colors, radii, spacing } from "../../tokens.stylex";
 import { PostCard } from "./PostCard";
-import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import { SkeletonFeed } from "./SkeletonPost";
 
 const fadeInUp = stylex.keyframes({
@@ -146,9 +146,14 @@ export function PostList({
 				<div
 					key={`${post.id}-${post.repostedBy?.username || "original"}`}
 					{...stylex.props(styles.postItem)}
-					ref={(el) => { postRefs.current[index] = el; }}
+					ref={(el) => {
+						postRefs.current[index] = el;
+					}}
 					tabIndex={-1}
-					style={{ outline: focusedIndex === index ? `2px solid ${colors.indigo500}` : "none", borderRadius: radii.xl }}
+					style={{
+						outline: focusedIndex === index ? `2px solid ${colors.indigo500}` : "none",
+						borderRadius: radii.xl,
+					}}
 				>
 					<PostCard
 						post={post}

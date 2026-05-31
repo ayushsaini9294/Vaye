@@ -299,7 +299,12 @@ function AuditPage() {
 	const groupedLogs = logs.reduce(
 		(acc, log) => {
 			const dateObj = new Date(log.createdAt as string);
-			const date = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+			const date = dateObj.toLocaleDateString(undefined, {
+				weekday: "long",
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			});
 			if (!acc[date]) {
 				acc[date] = [];
 			}

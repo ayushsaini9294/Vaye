@@ -2,14 +2,14 @@ import * as stylex from "@stylexjs/stylex";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Ban, Calendar, Heart, Mail, MessageSquare, Shield, User } from "lucide-react";
 import { requireAdminAccess } from "../../lib/auth-guard";
-import { colors, radii, spacing } from "../../tokens.stylex";
 import {
+	banUserFn,
 	getUserDetailsFn,
 	getUserPostsFn,
-	banUserFn,
 	unbanUserFn,
 	updateUserRoleFn,
 } from "../../server/functions/admin";
+import { colors, radii, spacing } from "../../tokens.stylex";
 
 const styles = stylex.create({
 	container: {
@@ -299,7 +299,11 @@ function UserDetailPage() {
 				<div {...stylex.props(styles.userSection)}>
 					<div {...stylex.props(styles.avatar)}>
 						{user.avatarUrl ? (
-							<img src={user.avatarUrl} alt={user.displayName} {...stylex.props(styles.avatarImg)} />
+							<img
+								src={user.avatarUrl}
+								alt={user.displayName}
+								{...stylex.props(styles.avatarImg)}
+							/>
 						) : (
 							<User size={40} />
 						)}

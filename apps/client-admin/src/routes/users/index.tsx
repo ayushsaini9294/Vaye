@@ -291,7 +291,9 @@ function UsersPage() {
 									</span>
 								</td>
 								<td {...stylex.props(styles.td)}>{user.postCount}</td>
-								<td {...stylex.props(styles.td)}>{new Date(user.createdAt as string).toLocaleDateString()}</td>
+								<td {...stylex.props(styles.td)}>
+									{new Date(user.createdAt as string).toLocaleDateString()}
+								</td>
 								<td {...stylex.props(styles.td)}>
 									<div {...stylex.props(styles.actionsCell)}>
 										<Link

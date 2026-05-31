@@ -11,11 +11,7 @@ export interface Shortcut {
 function isInTextInput(el: Element | null): boolean {
 	if (!el) return false;
 	const tag = (el as HTMLElement).tagName.toLowerCase();
-	return (
-		tag === "input" ||
-		tag === "textarea" ||
-		(el as HTMLElement).isContentEditable
-	);
+	return tag === "input" || tag === "textarea" || (el as HTMLElement).isContentEditable;
 }
 
 /**

@@ -1,9 +1,8 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-
 import { Header } from "../components/layout/Header";
 import { MobileNav } from "../components/layout/MobileNav";
 import { KeyboardShortcutsHelp } from "../components/shared/KeyboardShortcutsHelp";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
@@ -20,7 +19,10 @@ export const Route = createRootRoute({
 		links: [
 			{ rel: "preconnect", href: "https://fonts.googleapis.com" },
 			{ rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-			{ rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" },
+			{
+				rel: "stylesheet",
+				href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap",
+			},
 			{ rel: "stylesheet", href: appCss },
 			{ rel: "stylesheet", href: "/virtual:stylex.css" },
 		],

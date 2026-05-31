@@ -1,12 +1,12 @@
-import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { getConversations } from "../server/functions/chat";
-import { Card } from "@vaye/ui";
-import { UserAvatar } from "../components/users/UserAvatar";
 import * as stylex from "@stylexjs/stylex";
-import { colors, spacing, fontSize, fontWeight } from "../tokens.stylex";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { Card } from "@vaye/ui";
 import { MessageCircle, Search } from "lucide-react";
 import { useState } from "react";
+import { UserAvatar } from "../components/users/UserAvatar";
+import { getConversations } from "../server/functions/chat";
+import { colors, fontSize, fontWeight, spacing } from "../tokens.stylex";
 
 export const Route = createFileRoute("/messages")({
 	component: MessagesLayout,
@@ -277,9 +277,10 @@ function MessagesLayout() {
 	});
 
 	const filtered = searchFilter
-		? conversations?.filter((c: any) =>
-				c.otherUser?.displayName?.toLowerCase().includes(searchFilter.toLowerCase()) ||
-				c.otherUser?.username?.toLowerCase().includes(searchFilter.toLowerCase())
+		? conversations?.filter(
+				(c: any) =>
+					c.otherUser?.displayName?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+					c.otherUser?.username?.toLowerCase().includes(searchFilter.toLowerCase()),
 			)
 		: conversations;
 
@@ -342,25 +343,17 @@ function MessagesLayout() {
 								</div>
 								<div {...stylex.props(styles.conversationContent)}>
 									<div {...stylex.props(styles.conversationHeader)}>
-										<span {...stylex.props(styles.displayName)}>
-											{conv.otherUser!.displayName}
-										</span>
+										<span {...stylex.props(styles.displayName)}>{conv.otherUser!.displayName}</span>
 										{conv.lastMessage && (
-											<span {...stylex.props(styles.time)}>
-												{formatTime(conv.updatedAt)}
-											</span>
+											<span {...stylex.props(styles.time)}>{formatTime(conv.updatedAt)}</span>
 										)}
 									</div>
 									<div {...stylex.props(styles.lastMessage)}>
-										{conv.lastMessage
-											? conv.lastMessage.content
-											: "No messages yet"}
+										{conv.lastMessage ? conv.lastMessage.content : "No messages yet"}
 									</div>
 								</div>
 								{conv.unreadCount > 0 && (
-									<div {...stylex.props(styles.unreadBadge)}>
-										{conv.unreadCount}
-									</div>
+									<div {...stylex.props(styles.unreadBadge)}>{conv.unreadCount}</div>
 								)}
 							</Link>
 						))

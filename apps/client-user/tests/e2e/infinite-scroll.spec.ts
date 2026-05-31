@@ -20,15 +20,23 @@ test.describe("Infinite Scroll", () => {
 	// ── 3. Scrolling triggers loading-more state ─────────────────────────────
 	test("should trigger load-more or show end message when scrolled to bottom", async ({ page }) => {
 		// Scroll to bottom
-		await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" }));
+		await page.evaluate(() =>
+			window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" }),
+		);
 		await page.waitForTimeout(1000);
 
 		// Either "loading more" appeared or "end of feed" is shown — both are valid
 		const loadingMore = page.locator('[data-testid="loading-more"]');
 		const feedEnd = page.locator('[data-testid="feed-end"]');
 		const either = await Promise.race([
-			loadingMore.waitFor({ state: "visible" }).then(() => true).catch(() => false),
-			feedEnd.waitFor({ state: "visible" }).then(() => true).catch(() => false),
+			loadingMore
+				.waitFor({ state: "visible" })
+				.then(() => true)
+				.catch(() => false),
+			feedEnd
+				.waitFor({ state: "visible" })
+				.then(() => true)
+				.catch(() => false),
 		]);
 		expect(either).toBe(true);
 	});

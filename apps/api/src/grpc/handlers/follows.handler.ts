@@ -2,11 +2,11 @@ import type { IFollowsService } from "@vaye/proto";
 import { validateSessionToken } from "../../middleware/auth";
 import {
 	getFollowerCount,
+	getFollowers,
+	getFollowing,
 	getFollowingCount,
 	getFollowStatus,
 	toggleFollow,
-	getFollowers,
-	getFollowing,
 } from "../../services/follows.service";
 
 export const followsHandler: IFollowsService = {

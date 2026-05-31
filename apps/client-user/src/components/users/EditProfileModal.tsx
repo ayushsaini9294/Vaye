@@ -1,9 +1,17 @@
 import * as stylex from "@stylexjs/stylex";
 import { useRouter } from "@tanstack/react-router";
-import { X, Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useState } from "react";
 import { updateProfile } from "../../server/functions/users";
-import { colors, fontSize, fontWeight, radii, semanticColors, shadows, spacing } from "../../tokens.stylex";
+import {
+	colors,
+	fontSize,
+	fontWeight,
+	radii,
+	semanticColors,
+	shadows,
+	spacing,
+} from "../../tokens.stylex";
 
 const styles = stylex.create({
 	overlay: {

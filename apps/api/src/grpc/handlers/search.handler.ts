@@ -1,6 +1,9 @@
 import type { ISearchService, PostResponse } from "@vaye/proto";
 import { validateSessionToken } from "../../middleware/auth";
-import { searchPosts as searchPostsService, searchUsers as searchUsersService } from "../../services/search.service";
+import {
+	searchPosts as searchPostsService,
+	searchUsers as searchUsersService,
+} from "../../services/search.service";
 import { toProtoTimestamp } from "../../services/utils";
 
 function toPostResponse(post: any): PostResponse {

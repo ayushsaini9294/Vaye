@@ -1,4 +1,4 @@
-import { type VayeClient, createVayeClient } from "@vaye/grpc-client";
+import { createVayeClient, type VayeClient } from "@vaye/grpc-client";
 import jwt from "jsonwebtoken";
 import { getSessionData, type SessionData } from "./session.server";
 

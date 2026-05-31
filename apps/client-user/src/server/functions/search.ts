@@ -1,5 +1,5 @@
-import type { PostResponse, UserSearchResult } from "@vaye/proto";
 import { createServerFn } from "@tanstack/react-start";
+import type { PostResponse, UserSearchResult } from "@vaye/proto";
 import { fromProtoTimestamp, getGrpcClient, getGrpcSessionToken } from "../../lib/grpc.server";
 
 function mapPostResponse(post: PostResponse) {

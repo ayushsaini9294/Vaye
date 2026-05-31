@@ -50,8 +50,10 @@ describe("PostCard", () => {
 	it("displays like and comment counts", async () => {
 		const { PostCard } = await import("../../../src/components/posts/PostCard");
 		render(<PostCard post={mockPost} />);
-		expect(screen.getByText("5")).toBeInTheDocument();
-		expect(screen.getByText("3")).toBeInTheDocument();
+		const likeBtn = screen.getByRole("button", { name: /5/ });
+		const commentLnk = screen.getByRole("link", { name: /3/ });
+		expect(likeBtn).toBeInTheDocument();
+		expect(commentLnk).toBeInTheDocument();
 	});
 
 	it("shows delete button for own posts", async () => {

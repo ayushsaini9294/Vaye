@@ -88,8 +88,8 @@ export async function searchUsers(query: string) {
 		.where(
 			or(
 				sql`LOWER(${users.username}) LIKE ${searchPattern}`,
-				sql`LOWER(${users.displayName}) LIKE ${searchPattern}`
-			)
+				sql`LOWER(${users.displayName}) LIKE ${searchPattern}`,
+			),
 		)
 		.limit(20);
 

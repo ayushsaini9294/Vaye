@@ -1,5 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { FileText, Users, UserX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PostList } from "../../components/posts/PostList";

@@ -12,7 +12,9 @@ test.describe("Keyboard Shortcuts & Accessibility", () => {
 	test("should open shortcuts help overlay with ? key", async ({ page }) => {
 		await page.keyboard.press("?");
 		await expect(page.locator('[data-testid="shortcuts-overlay"]')).toBeVisible();
-		await expect(page.locator('[data-testid="shortcuts-overlay"]')).toContainText("Keyboard Shortcuts");
+		await expect(page.locator('[data-testid="shortcuts-overlay"]')).toContainText(
+			"Keyboard Shortcuts",
+		);
 	});
 
 	// ── 2. Escape closes overlay ─────────────────────────────────────────────

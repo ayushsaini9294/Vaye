@@ -1,5 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, ArrowRight, Lock, Mail, Zap } from "lucide-react";
 import { useState } from "react";
 import { loginUser } from "../../server/functions/auth";
@@ -76,7 +76,8 @@ const styles = stylex.create({
 		justifyContent: "center",
 		padding: spacing["3xl"],
 		backgroundColor: "#0f172a", // Deep slate/obsidian
-		backgroundImage: "radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%)",
+		backgroundImage:
+			"radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%)",
 	},
 	formContainer: {
 		width: "100%",

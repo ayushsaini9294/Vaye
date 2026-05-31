@@ -1,9 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import {
-	fromProtoTimestamp,
-	getGrpcClient,
-	getGrpcSessionToken,
-} from "../../lib/grpc.server";
+import { fromProtoTimestamp, getGrpcClient, getGrpcSessionToken } from "../../lib/grpc.server";
 import { getSessionData, requireAuth } from "../../lib/session.server";
 
 /**

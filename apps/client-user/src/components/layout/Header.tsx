@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Bookmark, Compass, Home, LogOut, Search, MessageSquare, Zap } from "lucide-react";
+import { Bookmark, Compass, Home, LogOut, MessageSquare, Search, Zap } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { getCurrentUser, logoutUser } from "../../server/functions/auth";
 import { colors, radii, semanticColors, spacing, zIndex } from "../../tokens.stylex";

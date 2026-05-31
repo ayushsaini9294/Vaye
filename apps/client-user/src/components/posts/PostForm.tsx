@@ -1,13 +1,10 @@
 import * as stylex from "@stylexjs/stylex";
 import { AlertCircle, AlertTriangle, ChevronDown, Send, Shield } from "lucide-react";
-import { useCallback,  useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createPost } from "../../server/functions/posts";
 import { colors, radii, semanticColors, spacing } from "../../tokens.stylex";
 import { CharacterCount } from "../shared/CharacterCount";
-import {
-	MentionAutocomplete,
-	type MentionAutocompleteHandle,
-} from "../shared/MentionAutocomplete";
+import { MentionAutocomplete, type MentionAutocompleteHandle } from "../shared/MentionAutocomplete";
 
 // ─── Draft persistence ────────────────────────────────────────────────────────
 const DRAFT_KEY = "vaye:draft";
@@ -168,7 +165,10 @@ const styles = stylex.create({
 		cursor: "pointer",
 		transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
 		boxShadow: "0 4px 12px -2px rgba(99, 102, 241, 0.25)",
-		":hover": { boxShadow: "0 6px 16px -2px rgba(99, 102, 241, 0.35)", transform: "translateY(-1px)" },
+		":hover": {
+			boxShadow: "0 6px 16px -2px rgba(99, 102, 241, 0.35)",
+			transform: "translateY(-1px)",
+		},
 		":disabled": { opacity: 0.5, cursor: "not-allowed", boxShadow: "none", transform: "none" },
 	},
 	spinner: {
@@ -221,7 +221,8 @@ export function PostForm({ onSuccess }: { onSuccess?: () => void }) {
 		setError("");
 
 		try {
-			const finalContent = showCw && cwText.trim() ? `<CW>${cwText.trim()}</CW>\n${content}` : content;
+			const finalContent =
+				showCw && cwText.trim() ? `<CW>${cwText.trim()}</CW>\n${content}` : content;
 			await createPost({ data: { content: finalContent } });
 			setContent("");
 			setCwText("");
@@ -246,20 +247,17 @@ export function PostForm({ onSuccess }: { onSuccess?: () => void }) {
 		if (mentionRef.current?.handleKeyDown(e)) return;
 	};
 
-	const handleSelect = useCallback(
-		(newText: string, newCursorPos: number) => {
-			setContent(newText);
-			setCursorPos(newCursorPos);
-			saveDraft(newText, showCw ? cwText : "");
-			requestAnimationFrame(() => {
-				const el = textareaRef.current;
-				if (!el) return;
-				el.setSelectionRange(newCursorPos, newCursorPos);
-				el.focus();
-			});
-		},
-		[],
-	);
+	const handleSelect = useCallback((newText: string, newCursorPos: number) => {
+		setContent(newText);
+		setCursorPos(newCursorPos);
+		saveDraft(newText, showCw ? cwText : "");
+		requestAnimationFrame(() => {
+			const el = textareaRef.current;
+			if (!el) return;
+			el.setSelectionRange(newCursorPos, newCursorPos);
+			el.focus();
+		});
+	}, []);
 
 	return (
 		<form onSubmit={handleSubmit} {...stylex.props(styles.form)} data-testid="post-form">
@@ -321,7 +319,13 @@ export function PostForm({ onSuccess }: { onSuccess?: () => void }) {
 					>
 						<Shield size={13} />
 						CW
-						<ChevronDown size={11} style={{ transform: showCw ? "rotate(180deg)" : undefined, transition: "transform 0.2s" }} />
+						<ChevronDown
+							size={11}
+							style={{
+								transform: showCw ? "rotate(180deg)" : undefined,
+								transition: "transform 0.2s",
+							}}
+						/>
 					</button>
 				</div>
 

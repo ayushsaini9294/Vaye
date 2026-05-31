@@ -338,7 +338,16 @@ function SearchPage() {
 
 			{/* Error banner */}
 			{searchError && (
-				<div style={{ background: "#fee2e2", color: "#dc2626", padding: "1rem", borderRadius: "0.75rem", marginBottom: "1rem", fontSize: "0.875rem" }}>
+				<div
+					style={{
+						background: "#fee2e2",
+						color: "#dc2626",
+						padding: "1rem",
+						borderRadius: "0.75rem",
+						marginBottom: "1rem",
+						fontSize: "0.875rem",
+					}}
+				>
 					⚠️ {searchError}
 				</div>
 			)}

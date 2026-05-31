@@ -1,3 +1,5 @@
+import { ChannelCredentials } from "@grpc/grpc-js";
+import { GrpcTransport } from "@protobuf-ts/grpc-transport";
 import {
 	AdminServiceClient,
 	AuthServiceClient,
@@ -12,8 +14,6 @@ import {
 	SearchServiceClient,
 	UsersServiceClient,
 } from "@vaye/proto";
-import { ChannelCredentials } from "@grpc/grpc-js";
-import { GrpcTransport } from "@protobuf-ts/grpc-transport";
 
 export interface VayeClientConfig {
 	host: string;

@@ -16,9 +16,7 @@ test.describe("Revaye (Repost)", () => {
 	// ── 2. Repost a post ────────────────────────────────────────────────────
 	test("should revaye a post (repost count increments)", async ({ page }) => {
 		// Find the first post that Alice does NOT own so the button is enabled
-		const firstEnabledBtn = page
-			.locator('[data-testid="revaye-button"]:not([disabled])')
-			.first();
+		const firstEnabledBtn = page.locator('[data-testid="revaye-button"]:not([disabled])').first();
 		await expect(firstEnabledBtn).toBeVisible();
 
 		// Ensure a clean baseline: if already revayeed, undo it first
@@ -44,9 +42,7 @@ test.describe("Revaye (Repost)", () => {
 	test("should undo a revaye (repost count decrements)", async ({ page }) => {
 		// Use a stable locator pinned by postId so we don’t lose track during
 		// the button’s disabled/loading window
-		const anyEnabledBtn = page
-			.locator('[data-testid="revaye-button"]:not([disabled])')
-			.first();
+		const anyEnabledBtn = page.locator('[data-testid="revaye-button"]:not([disabled])').first();
 		await expect(anyEnabledBtn).toBeVisible();
 
 		// Pin the locator to this specific button via its id
@@ -76,9 +72,7 @@ test.describe("Revaye (Repost)", () => {
 	// ── 4. Repost count is displayed ────────────────────────────────────────
 	test("should display repost count alongside the revaye button", async ({ page }) => {
 		// Every revaye button renders a span with the count (even if 0)
-		const countSpan = page
-			.locator('[data-testid="revaye-button"] span')
-			.first();
+		const countSpan = page.locator('[data-testid="revaye-button"] span').first();
 		await expect(countSpan).toBeVisible();
 		// Count should be a non-negative integer
 		const text = await countSpan.innerText();
@@ -92,16 +86,16 @@ test.describe("Revaye (Repost)", () => {
 		await waitForHydration(page);
 
 		// Find any enabled revaye button (non-alice post)
-		const anyEnabledBtn = page
-			.locator('[data-testid="revaye-button"]:not([disabled])')
-			.first();
+		const anyEnabledBtn = page.locator('[data-testid="revaye-button"]:not([disabled])').first();
 		await expect(anyEnabledBtn).toBeVisible();
 
 		// Pin by ID and capture the post text
 		const btnId = await anyEnabledBtn.getAttribute("id");
 		const btn = page.locator(`[id="${btnId}"]`).first();
 		const owningArticle = anyEnabledBtn.locator("xpath=ancestor::article");
-		const postText = (await owningArticle.locator("a[href*='/posts/']").first().innerText()).trim().substring(0, 40);
+		const postText = (await owningArticle.locator("a[href*='/posts/']").first().innerText())
+			.trim()
+			.substring(0, 40);
 
 		// Revaye if not already revayeed
 		const state = await btn.getAttribute("data-revayeed");

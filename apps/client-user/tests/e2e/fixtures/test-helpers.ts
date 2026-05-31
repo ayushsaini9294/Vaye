@@ -38,14 +38,15 @@ export async function waitForHydration(page: Page): Promise<void> {
 	// We use "load" instead of "networkidle" because background polling (TanStack Query, etc.)
 	// can prevent the network from ever becoming "idle", causing timeouts.
 	await page.waitForLoadState("load", { timeout: 15000 }).catch(() => {});
-	
+
 	// Wait a tiny bit for React to actually hydrate and event listeners to attach
 	await page.waitForTimeout(500);
 
 	// Remove Nitro dev server error overlay if present
 	try {
 		await page.evaluate(() => {
-			for (const el of document.querySelectorAll("vite-error-overlay")) (el as HTMLElement).remove();
+			for (const el of document.querySelectorAll("vite-error-overlay"))
+				(el as HTMLElement).remove();
 		});
 	} catch {
 		// Context may have been destroyed by a concurrent navigation

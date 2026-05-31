@@ -30,7 +30,7 @@ export const chatHandler: IChatService = {
 			const limit = request.pagination?.limit || 50;
 			const offset = request.pagination?.offset || 0;
 
-			// In a more secure app we would verify this user is part of the conversation, 
+			// In a more secure app we would verify this user is part of the conversation,
 			// but keeping it simple for the MVP.
 			const messages = await getMessages(request.conversationId, limit, offset);
 

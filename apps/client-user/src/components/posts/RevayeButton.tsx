@@ -117,11 +117,7 @@ export function RevayeButton({
 		}
 	};
 
-	const title = isOwnPost
-		? "Cannot repost your own post"
-		: revayeed
-			? "Undo Repost"
-			: "Repost";
+	const title = isOwnPost ? "Cannot repost your own post" : revayeed ? "Undo Repost" : "Repost";
 
 	return (
 		<button
@@ -138,7 +134,10 @@ export function RevayeButton({
 				isOwnPost && styles.buttonDisabled,
 			)}
 		>
-			<Repeat2 size={20} {...stylex.props(revayeed && styles.iconFilled, animateSpin && styles.iconSpin)} />
+			<Repeat2
+				size={20}
+				{...stylex.props(revayeed && styles.iconFilled, animateSpin && styles.iconSpin)}
+			/>
 			<span {...stylex.props(styles.count)}>{revayeCount}</span>
 		</button>
 	);

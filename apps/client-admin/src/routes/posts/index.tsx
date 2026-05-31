@@ -221,7 +221,9 @@ function PostsPage() {
 									>
 										{post.author?.displayName ?? "Unknown User"}
 									</Link>
-									<span {...stylex.props(styles.authorHandle)}>@{post.author?.username ?? "unknown"}</span>
+									<span {...stylex.props(styles.authorHandle)}>
+										@{post.author?.username ?? "unknown"}
+									</span>
 								</div>
 							</div>
 							<div {...stylex.props(styles.postActions)}>
@@ -250,7 +252,9 @@ function PostsPage() {
 								</span>
 								{/* post.reports doesn't exist on PostsResponse from backend, would need AdminService.ListPostsAdmin */}
 							</div>
-							<span {...stylex.props(styles.postTime)}>{new Date(post.createdAt as string).toLocaleString()}</span>
+							<span {...stylex.props(styles.postTime)}>
+								{new Date(post.createdAt as string).toLocaleString()}
+							</span>
 						</div>
 					</article>
 				))}

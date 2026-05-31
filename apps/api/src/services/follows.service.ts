@@ -1,4 +1,4 @@
-import { and, eq, sql, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db, schema } from "../db";
 import { createNotification } from "./notifications.service";
 import { generateId } from "./utils";
@@ -96,7 +96,12 @@ export async function getFollowingCount(username: string) {
 	return { count: result?.count || 0 };
 }
 
-export async function getFollowers(username: string, limit: number, offset: number, requesterId?: string) {
+export async function getFollowers(
+	username: string,
+	limit: number,
+	offset: number,
+	requesterId?: string,
+) {
 	const user = await db.select().from(users).where(eq(users.username, username)).get();
 	if (!user) throw new Error("User not found");
 
@@ -120,32 +125,34 @@ export async function getFollowers(username: string, limit: number, offset: numb
 		.from(follows)
 		.where(eq(follows.followingId, user.id))
 		.get();
-	
+
 	const total = countResult?.count || 0;
 
-	let resultUsers = followersResult.map(u => ({ ...u, isFollowing: false }));
-	
+	let resultUsers = followersResult.map((u) => ({ ...u, isFollowing: false }));
+
 	if (requesterId && resultUsers.length > 0) {
-		const followedIds = resultUsers.map(u => u.id);
+		const followedIds = resultUsers.map((u) => u.id);
 		const existingFollows = await db
 			.select({ followingId: follows.followingId })
 			.from(follows)
-			.where(and(
-				eq(follows.followerId, requesterId),
-				inArray(follows.followingId, followedIds)
-			));
-		
-		const followedSet = new Set(existingFollows.map(f => f.followingId));
-		resultUsers = resultUsers.map(u => ({
+			.where(and(eq(follows.followerId, requesterId), inArray(follows.followingId, followedIds)));
+
+		const followedSet = new Set(existingFollows.map((f) => f.followingId));
+		resultUsers = resultUsers.map((u) => ({
 			...u,
-			isFollowing: followedSet.has(u.id)
+			isFollowing: followedSet.has(u.id),
 		}));
 	}
 
 	return { users: resultUsers, total };
 }
 
-export async function getFollowing(username: string, limit: number, offset: number, requesterId?: string) {
+export async function getFollowing(
+	username: string,
+	limit: number,
+	offset: number,
+	requesterId?: string,
+) {
 	const user = await db.select().from(users).where(eq(users.username, username)).get();
 	if (!user) throw new Error("User not found");
 
@@ -169,25 +176,22 @@ export async function getFollowing(username: string, limit: number, offset: numb
 		.from(follows)
 		.where(eq(follows.followerId, user.id))
 		.get();
-	
+
 	const total = countResult?.count || 0;
 
-	let resultUsers = followingResult.map(u => ({ ...u, isFollowing: false }));
-	
+	let resultUsers = followingResult.map((u) => ({ ...u, isFollowing: false }));
+
 	if (requesterId && resultUsers.length > 0) {
-		const followedIds = resultUsers.map(u => u.id);
+		const followedIds = resultUsers.map((u) => u.id);
 		const existingFollows = await db
 			.select({ followingId: follows.followingId })
 			.from(follows)
-			.where(and(
-				eq(follows.followerId, requesterId),
-				inArray(follows.followingId, followedIds)
-			));
-		
-		const followedSet = new Set(existingFollows.map(f => f.followingId));
-		resultUsers = resultUsers.map(u => ({
+			.where(and(eq(follows.followerId, requesterId), inArray(follows.followingId, followedIds)));
+
+		const followedSet = new Set(existingFollows.map((f) => f.followingId));
+		resultUsers = resultUsers.map((u) => ({
 			...u,
-			isFollowing: followedSet.has(u.id)
+			isFollowing: followedSet.has(u.id),
 		}));
 	}
 

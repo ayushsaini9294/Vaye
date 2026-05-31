@@ -1,8 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { Keyboard, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { colors, radii, semanticColors, shadows, spacing } from "../../tokens.stylex";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
+import { colors, radii, semanticColors, shadows, spacing } from "../../tokens.stylex";
 
 const styles = stylex.create({
 	trigger: {
@@ -106,22 +106,31 @@ const styles = stylex.create({
 });
 
 const SHORTCUTS = [
-	{ group: "Navigation", items: [
-		{ key: "J", description: "Next post" },
-		{ key: "K", description: "Previous post" },
-		{ key: "Enter", description: "Open focused post" },
-	]},
-	{ group: "Actions on focused post", items: [
-		{ key: "L", description: "Like / Unlike" },
-		{ key: "B", description: "Bookmark / Unbookmark" },
-		{ key: "R", description: "Reply (open post)" },
-		{ key: "T", description: "Revaye (repost)" },
-	]},
-	{ group: "Global", items: [
-		{ key: "?", description: "Show / hide this help" },
-		{ key: "N", description: "New post (focus compose)" },
-		{ key: "Escape", description: "Dismiss dialogs" },
-	]},
+	{
+		group: "Navigation",
+		items: [
+			{ key: "J", description: "Next post" },
+			{ key: "K", description: "Previous post" },
+			{ key: "Enter", description: "Open focused post" },
+		],
+	},
+	{
+		group: "Actions on focused post",
+		items: [
+			{ key: "L", description: "Like / Unlike" },
+			{ key: "B", description: "Bookmark / Unbookmark" },
+			{ key: "R", description: "Reply (open post)" },
+			{ key: "T", description: "Revaye (repost)" },
+		],
+	},
+	{
+		group: "Global",
+		items: [
+			{ key: "?", description: "Show / hide this help" },
+			{ key: "N", description: "New post (focus compose)" },
+			{ key: "Escape", description: "Dismiss dialogs" },
+		],
+	},
 ];
 
 export function KeyboardShortcutsHelp() {
@@ -133,13 +142,13 @@ export function KeyboardShortcutsHelp() {
 
 	const toggle = useCallback(() => setOpen((v) => !v), []);
 
-	useKeyboardShortcuts([
-		{ key: "?", description: "Show keyboard shortcuts", action: toggle },
-	]);
+	useKeyboardShortcuts([{ key: "?", description: "Show keyboard shortcuts", action: toggle }]);
 
 	// Close on Escape
 	useEffect(() => {
-		const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+		const handler = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setOpen(false);
+		};
 		window.addEventListener("keydown", handler);
 		return () => window.removeEventListener("keydown", handler);
 	}, []);
@@ -158,10 +167,10 @@ export function KeyboardShortcutsHelp() {
 
 	const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
 		if (!dragging) return;
-		
+
 		const nextX = e.clientX - dragStart.x;
 		const nextY = e.clientY - dragStart.y;
-		
+
 		// If pointer moves more than 4px, classify it as dragging instead of static clicking
 		const rect = e.currentTarget.getBoundingClientRect();
 		const currentX = rect.left;
@@ -170,13 +179,13 @@ export function KeyboardShortcutsHelp() {
 		if (distance > 4) {
 			setHasMoved(true);
 		}
-		
+
 		// Keep within viewport safety margins
-		const buttonSize = 40; 
+		const buttonSize = 40;
 		const padding = 16;
 		const x = Math.max(padding, Math.min(window.innerWidth - buttonSize - padding, nextX));
 		const y = Math.max(padding, Math.min(window.innerHeight - buttonSize - padding, nextY));
-		
+
 		setPosition({ x, y });
 	};
 
@@ -204,12 +213,16 @@ export function KeyboardShortcutsHelp() {
 				onPointerUp={handlePointerUp}
 				onClick={handleClick}
 				{...stylex.props(styles.trigger, dragging && styles.triggerDragging)}
-				style={position ? {
-					left: `${position.x}px`,
-					top: `${position.y}px`,
-					right: "auto",
-					bottom: "auto",
-				} : undefined}
+				style={
+					position
+						? {
+								left: `${position.x}px`,
+								top: `${position.y}px`,
+								right: "auto",
+								bottom: "auto",
+							}
+						: undefined
+				}
 				aria-label="Keyboard shortcuts"
 				data-testid="shortcuts-trigger"
 				title="Keyboard shortcuts (?)"
@@ -220,7 +233,9 @@ export function KeyboardShortcutsHelp() {
 			{open && (
 				<div
 					{...stylex.props(styles.overlay)}
-					onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
+					onClick={(e) => {
+						if (e.target === e.currentTarget) setOpen(false);
+					}}
 					data-testid="shortcuts-overlay"
 					role="dialog"
 					aria-modal="true"
@@ -229,7 +244,12 @@ export function KeyboardShortcutsHelp() {
 					<div {...stylex.props(styles.panel)}>
 						<div {...stylex.props(styles.header)}>
 							<h2 {...stylex.props(styles.title)}>Keyboard Shortcuts</h2>
-							<button type="button" onClick={() => setOpen(false)} {...stylex.props(styles.closeBtn)} aria-label="Close">
+							<button
+								type="button"
+								onClick={() => setOpen(false)}
+								{...stylex.props(styles.closeBtn)}
+								aria-label="Close"
+							>
 								<X size={18} />
 							</button>
 						</div>

@@ -1,5 +1,5 @@
-import * as schema from "@vaye/db-schema";
 import { createClient } from "@libsql/client";
+import * as schema from "@vaye/db-schema";
 import { drizzle } from "drizzle-orm/libsql";
 
 const client = createClient({

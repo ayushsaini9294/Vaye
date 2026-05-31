@@ -8,15 +8,6 @@ import type {
 	BanUserResponse,
 	BookmarkResponse,
 	BookmarkStatusResponse,
-	// Chat
-	GetConversationsRequest,
-	GetConversationsResponse,
-	GetMessagesRequest,
-	GetMessagesResponse,
-	SendMessageRequest,
-	SendMessageResponse,
-	MarkConversationAsReadRequest,
-	MarkConversationAsReadResponse,
 	CommentsResponse,
 	CountResponse,
 	// Comments
@@ -44,17 +35,21 @@ import type {
 	GetBookmarkedPostsRequest,
 	GetBookmarkStatusRequest,
 	GetCommentLikeStatusRequest,
+	// Chat
+	GetConversationsRequest,
+	GetConversationsResponse,
 	GetCountRequest,
 	GetCurrentUserRequest,
 	GetDashboardStatsRequest,
 	GetExploreFeedRequest,
-	GetFollowStatusRequest,
 	GetFollowersRequest,
 	GetFollowingRequest,
-	UsersListResponse,
+	GetFollowStatusRequest,
 	// Feed
 	GetHomeFeedRequest,
 	GetLikeStatusRequest,
+	GetMessagesRequest,
+	GetMessagesResponse,
 	// Notifications
 	GetNotificationsRequest,
 	GetNotificationsResponse,
@@ -82,6 +77,8 @@ import type {
 	MarkAllAsReadResponse,
 	MarkAsReadRequest,
 	MarkAsReadResponse,
+	MarkConversationAsReadRequest,
+	MarkConversationAsReadResponse,
 	PostResponse,
 	PostsResponse,
 	// Auth
@@ -91,6 +88,8 @@ import type {
 	ReviewReportResponse,
 	// Search
 	SearchRequest,
+	SendMessageRequest,
+	SendMessageResponse,
 	// Bookmarks
 	ToggleBookmarkRequest,
 	ToggleCommentLikeRequest,
@@ -109,6 +108,7 @@ import type {
 	UserDetailsResponse,
 	UserProfileResponse,
 	UserResponse,
+	UsersListResponse,
 	UsersResponse,
 	ValidateSessionRequest,
 	ValidateSessionResponse,

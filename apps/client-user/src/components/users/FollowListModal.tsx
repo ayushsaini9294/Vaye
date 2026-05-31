@@ -156,7 +156,9 @@ export function FollowListModal({ username, type, onClose }: FollowListModalProp
 		<div {...stylex.props(styles.overlay)} onClick={onClose}>
 			<div {...stylex.props(styles.modal)} onClick={(e) => e.stopPropagation()}>
 				<div {...stylex.props(styles.header)}>
-					<h2 {...stylex.props(styles.title)}>{type === "followers" ? "Followers" : "Following"}</h2>
+					<h2 {...stylex.props(styles.title)}>
+						{type === "followers" ? "Followers" : "Following"}
+					</h2>
 					<button type="button" onClick={onClose} {...stylex.props(styles.closeButton)}>
 						<X size={20} />
 					</button>
@@ -168,9 +170,7 @@ export function FollowListModal({ username, type, onClose }: FollowListModalProp
 							<LoadingSpinner />
 						</div>
 					) : users.length === 0 ? (
-						<div {...stylex.props(styles.emptyWrapper)}>
-							No {type} yet.
-						</div>
+						<div {...stylex.props(styles.emptyWrapper)}>No {type} yet.</div>
 					) : (
 						users.map((user) => (
 							<div key={user.id} {...stylex.props(styles.userCard)}>
@@ -178,7 +178,14 @@ export function FollowListModal({ username, type, onClose }: FollowListModalProp
 									to="/users/$username"
 									params={{ username: user.username }}
 									onClick={onClose}
-									style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, textDecoration: "none", color: "inherit" }}
+									style={{
+										display: "flex",
+										alignItems: "center",
+										gap: "12px",
+										flex: 1,
+										textDecoration: "none",
+										color: "inherit",
+									}}
 								>
 									<UserAvatar avatarUrl={user.avatarUrl} username={user.username} size="md" />
 									<div {...stylex.props(styles.userInfo)}>

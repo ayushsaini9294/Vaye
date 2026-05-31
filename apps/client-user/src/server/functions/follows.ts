@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getGrpcClient, requireGrpcSessionToken, getGrpcSessionToken } from "../../lib/grpc.server";
+import { getGrpcClient, getGrpcSessionToken, requireGrpcSessionToken } from "../../lib/grpc.server";
 
 export const toggleFollow = createServerFn({ method: "POST" })
 	.inputValidator((d: string) => d)

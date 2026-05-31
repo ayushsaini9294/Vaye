@@ -1,18 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
-import { fromProtoTimestamp, getGrpcClient, requireGrpcSessionToken } from "../../lib/grpc.server";
 import type { ConversationResponse, MessageResponse } from "@vaye/proto";
+import { fromProtoTimestamp, getGrpcClient, requireGrpcSessionToken } from "../../lib/grpc.server";
 
 function mapConversationResponse(c: ConversationResponse) {
 	return {
 		id: c.id,
 		unreadCount: c.unreadCount,
 		updatedAt: c.updatedAt ? fromProtoTimestamp(c.updatedAt) : new Date(),
-		otherUser: c.otherUser ? {
-			id: c.otherUser.id,
-			username: c.otherUser.username,
-			displayName: c.otherUser.displayName,
-			avatarUrl: c.otherUser.avatarUrl,
-		} : null,
+		otherUser: c.otherUser
+			? {
+					id: c.otherUser.id,
+					username: c.otherUser.username,
+					displayName: c.otherUser.displayName,
+					avatarUrl: c.otherUser.avatarUrl,
+				}
+			: null,
 		lastMessage: c.lastMessage ? mapMessageResponse(c.lastMessage) : null,
 	};
 }

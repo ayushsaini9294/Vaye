@@ -1,6 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import { Link, useLocation } from "@tanstack/react-router";
-import { Bell, Bookmark, Compass, Home, Search, MessageSquare } from "lucide-react";
+import { Bell, Bookmark, Compass, Home, MessageSquare, Search } from "lucide-react";
 import { colors, semanticColors, spacing, zIndex } from "../../tokens.stylex";
 
 const styles = stylex.create({
@@ -56,23 +56,38 @@ export function MobileNav() {
 				<Home size={22} />
 				<span {...stylex.props(styles.navLabel)}>Home</span>
 			</Link>
-			<Link to="/explore" {...stylex.props(styles.navLink, isActive("/explore") && styles.navLinkActive)}>
+			<Link
+				to="/explore"
+				{...stylex.props(styles.navLink, isActive("/explore") && styles.navLinkActive)}
+			>
 				<Compass size={22} />
 				<span {...stylex.props(styles.navLabel)}>Explore</span>
 			</Link>
-			<Link to="/search" {...stylex.props(styles.navLink, isActive("/search") && styles.navLinkActive)}>
+			<Link
+				to="/search"
+				{...stylex.props(styles.navLink, isActive("/search") && styles.navLinkActive)}
+			>
 				<Search size={22} />
 				<span {...stylex.props(styles.navLabel)}>Search</span>
 			</Link>
-			<Link to="/notifications" {...stylex.props(styles.navLink, isActive("/notifications") && styles.navLinkActive)}>
+			<Link
+				to="/notifications"
+				{...stylex.props(styles.navLink, isActive("/notifications") && styles.navLinkActive)}
+			>
 				<Bell size={22} />
 				<span {...stylex.props(styles.navLabel)}>Inbox</span>
 			</Link>
-			<Link to="/bookmarks" {...stylex.props(styles.navLink, isActive("/bookmarks") && styles.navLinkActive)}>
+			<Link
+				to="/bookmarks"
+				{...stylex.props(styles.navLink, isActive("/bookmarks") && styles.navLinkActive)}
+			>
 				<Bookmark size={22} />
 				<span {...stylex.props(styles.navLabel)}>Saved</span>
 			</Link>
-			<Link to="/messages" {...stylex.props(styles.navLink, isActive("/messages") && styles.navLinkActive)}>
+			<Link
+				to="/messages"
+				{...stylex.props(styles.navLink, isActive("/messages") && styles.navLinkActive)}
+			>
 				<MessageSquare size={22} />
 				<span {...stylex.props(styles.navLabel)}>Chat</span>
 			</Link>

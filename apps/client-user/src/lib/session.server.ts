@@ -6,7 +6,10 @@ export interface SessionData {
 // Session secret - in production, MUST use environment variable
 const SESSION_SECRET = process.env.SESSION_SECRET || "vaye-session-secret-key-at-least-32-chars";
 
-if (process.env.NODE_ENV === "production" && SESSION_SECRET === "vaye-session-secret-key-at-least-32-chars") {
+if (
+	process.env.NODE_ENV === "production" &&
+	SESSION_SECRET === "vaye-session-secret-key-at-least-32-chars"
+) {
 	console.warn("WARNING: Running in production with default SESSION_SECRET. This is insecure!");
 }
 
@@ -26,10 +29,10 @@ export async function getSessionData(): Promise<SessionData | null> {
 		const { getCookie } = await import("@tanstack/react-start/server");
 		const cookieValue = getCookie(SESSION_CONFIG.name);
 		if (!cookieValue) return null;
-		
+
 		// If it's a sealed string (starts with "j:"), we might have trouble unsealing it manually
 		// but let's assume for now we can just parse it if we set it as JSON
-		if (cookieValue.startsWith('j:')) {
+		if (cookieValue.startsWith("j:")) {
 			return JSON.parse(cookieValue.substring(2));
 		}
 		return JSON.parse(cookieValue);
@@ -44,7 +47,7 @@ export async function setSessionData(data: SessionData): Promise<void> {
 		// We use a simple JSON string prefixed with j: which is a common convention
 		// and might be enough to trick the rest of the system if needed.
 		// For E2E tests, this should be fine.
-		setCookie(SESSION_CONFIG.name, 'j:' + JSON.stringify(data), SESSION_CONFIG.cookie);
+		setCookie(SESSION_CONFIG.name, "j:" + JSON.stringify(data), SESSION_CONFIG.cookie);
 	} catch (error) {
 		console.error("Failed to set session data:", error);
 	}

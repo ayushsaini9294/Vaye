@@ -1,5 +1,5 @@
-import type { CommentResponse } from "@vaye/proto";
 import { createServerFn } from "@tanstack/react-start";
+import type { CommentResponse } from "@vaye/proto";
 import {
 	fromProtoTimestamp,
 	getGrpcClient,

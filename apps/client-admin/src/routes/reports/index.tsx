@@ -318,7 +318,9 @@ function ReportsPage() {
 										<TargetIcon size={14} />
 										<span {...stylex.props(styles.targetLabel)}>Reported {report.targetType}</span>
 									</div>
-									<p {...stylex.props(styles.targetContent)}>{report.description || `Content for ${report.targetType} ${report.targetId}`}</p>
+									<p {...stylex.props(styles.targetContent)}>
+										{report.description || `Content for ${report.targetType} ${report.targetId}`}
+									</p>
 								</div>
 
 								<div {...stylex.props(styles.reportMeta)}>

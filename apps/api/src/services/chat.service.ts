@@ -1,5 +1,5 @@
-import { db, schema } from "../db";
 import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { db, schema } from "../db";
 import { generateId, toProtoTimestamp } from "./utils";
 
 const { conversations, messages, users, follows } = schema;
@@ -26,7 +26,7 @@ export async function getConversations(userId: string, limit: number, offset: nu
 		.orderBy(desc(messages.createdAt));
 
 	// Build a map of conversationId -> latest message
-	const msgMap = new Map<string, typeof allMessages[0]>();
+	const msgMap = new Map<string, (typeof allMessages)[0]>();
 	for (const m of allMessages) {
 		if (!msgMap.has(m.conversationId)) {
 			msgMap.set(m.conversationId, m);
@@ -44,22 +44,17 @@ export async function getConversations(userId: string, limit: number, offset: nu
 			and(
 				inArray(messages.conversationId, conversationIds),
 				eq(messages.read, false),
-				sql`${messages.senderId} != ${userId}`
-			)
+				sql`${messages.senderId} != ${userId}`,
+			),
 		)
 		.groupBy(messages.conversationId);
 
 	const unreadMap = new Map(unreadCounts.map((u) => [u.conversationId, u.count]));
 
 	// Get the "other" users for each conversation
-	const otherUserIds = userConversations.map((c) =>
-		c.user1Id === userId ? c.user2Id : c.user1Id
-	);
+	const otherUserIds = userConversations.map((c) => (c.user1Id === userId ? c.user2Id : c.user1Id));
 
-	const otherUsers = await db
-		.select()
-		.from(users)
-		.where(inArray(users.id, otherUserIds));
+	const otherUsers = await db.select().from(users).where(inArray(users.id, otherUserIds));
 
 	const userMap = new Map(otherUsers.map((u) => [u.id, u]));
 
@@ -86,7 +81,7 @@ export async function getConversations(userId: string, limit: number, offset: nu
 						content: lastMessage.content,
 						read: lastMessage.read,
 						createdAt: toProtoTimestamp(lastMessage.createdAt),
-				  }
+					}
 				: undefined,
 		};
 	});
@@ -101,14 +96,16 @@ export async function getMessages(conversationId: string, limit: number, offset:
 		.limit(limit)
 		.offset(offset);
 
-	return msgs.map((m) => ({
-		id: m.id,
-		conversationId: m.conversationId,
-		senderId: m.senderId,
-		content: m.content,
-		read: m.read,
-		createdAt: toProtoTimestamp(m.createdAt),
-	})).reverse(); // Return in chronological order
+	return msgs
+		.map((m) => ({
+			id: m.id,
+			conversationId: m.conversationId,
+			senderId: m.senderId,
+			content: m.content,
+			read: m.read,
+			createdAt: toProtoTimestamp(m.createdAt),
+		}))
+		.reverse(); // Return in chronological order
 }
 
 export async function sendMessage(senderId: string, receiverUsername: string, content: string) {
@@ -131,8 +128,8 @@ export async function sendMessage(senderId: string, receiverUsername: string, co
 		.where(
 			or(
 				and(eq(follows.followerId, senderId), eq(follows.followingId, receiver.id)),
-				and(eq(follows.followerId, receiver.id), eq(follows.followingId, senderId))
-			)
+				and(eq(follows.followerId, receiver.id), eq(follows.followingId, senderId)),
+			),
 		)
 		.limit(1);
 
@@ -147,8 +144,8 @@ export async function sendMessage(senderId: string, receiverUsername: string, co
 		.where(
 			or(
 				and(eq(conversations.user1Id, senderId), eq(conversations.user2Id, receiver.id)),
-				and(eq(conversations.user1Id, receiver.id), eq(conversations.user2Id, senderId))
-			)
+				and(eq(conversations.user1Id, receiver.id), eq(conversations.user2Id, senderId)),
+			),
 		)
 		.limit(1);
 
@@ -162,7 +159,9 @@ export async function sendMessage(senderId: string, receiverUsername: string, co
 			user1Id: senderId,
 			user2Id: receiver.id,
 		});
-		conversation = (await db.select().from(conversations).where(eq(conversations.id, newConvId)).limit(1))[0]!;
+		conversation = (
+			await db.select().from(conversations).where(eq(conversations.id, newConvId)).limit(1)
+		)[0]!;
 	}
 
 	const messageId = generateId();
@@ -199,7 +198,7 @@ export async function markAsRead(conversationId: string, userId: string) {
 			and(
 				eq(messages.conversationId, conversationId),
 				eq(messages.read, false),
-				sql`${messages.senderId} != ${userId}`
-			)
+				sql`${messages.senderId} != ${userId}`,
+			),
 		);
 }

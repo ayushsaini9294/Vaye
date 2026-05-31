@@ -5,7 +5,7 @@ const { users, posts, comments, likes, follows } = schema;
 
 async function seed() {
 	console.log("Seeding database...");
-	
+
 	// Clear existing data
 	console.log("Clearing existing data...");
 	await db.delete(follows);

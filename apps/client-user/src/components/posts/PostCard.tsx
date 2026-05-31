@@ -1,7 +1,8 @@
 import * as stylex from "@stylexjs/stylex";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Edit, Heart, MessageCircle, Repeat2, Trash2, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Edit, Heart, MessageCircle, Repeat2, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import { togglePostLike } from "../../server/functions/likes";
 import { deletePost } from "../../server/functions/posts";
 import { colors, radii, semanticColors, shadows, spacing } from "../../tokens.stylex";
@@ -10,7 +11,6 @@ import { RelativeTime } from "../shared/RelativeTime";
 import { UserAvatar } from "../users/UserAvatar";
 import { BookmarkButton } from "./BookmarkButton";
 import { RevayeButton } from "./RevayeButton";
-import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 
 const fadeInUp = stylex.keyframes({
 	from: {
@@ -313,17 +313,37 @@ export function PostCard({ post, currentUserId, onDelete, isFocused }: PostCardP
 		}
 	};
 
-	useKeyboardShortcuts(isFocused ? [
-		{ key: "l", description: "Like", action: handleLike },
-		{ key: "Enter", description: "Open post", action: () => navigate({ to: `/posts/${post.id}` }) },
-		{ key: "r", description: "Reply", action: () => navigate({ to: `/posts/${post.id}` }) },
-		{ key: "b", description: "Bookmark", action: () => {
-			document.querySelector<HTMLElement>(`[data-post-id="${post.id}"] [data-action="bookmark"]`)?.click();
-		}},
-		{ key: "t", description: "Revaye", action: () => {
-			document.querySelector<HTMLElement>(`[data-post-id="${post.id}"] [data-action="revaye"]`)?.click();
-		}},
-	] : []);
+	useKeyboardShortcuts(
+		isFocused
+			? [
+					{ key: "l", description: "Like", action: handleLike },
+					{
+						key: "Enter",
+						description: "Open post",
+						action: () => navigate({ to: `/posts/${post.id}` }),
+					},
+					{ key: "r", description: "Reply", action: () => navigate({ to: `/posts/${post.id}` }) },
+					{
+						key: "b",
+						description: "Bookmark",
+						action: () => {
+							document
+								.querySelector<HTMLElement>(`[data-post-id="${post.id}"] [data-action="bookmark"]`)
+								?.click();
+						},
+					},
+					{
+						key: "t",
+						description: "Revaye",
+						action: () => {
+							document
+								.querySelector<HTMLElement>(`[data-post-id="${post.id}"] [data-action="revaye"]`)
+								?.click();
+						},
+					},
+				]
+			: [],
+	);
 
 	const handleDelete = async () => {
 		if (!confirm("Are you sure you want to delete this post?")) return;

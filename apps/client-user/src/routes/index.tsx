@@ -1,5 +1,5 @@
 import * as stylex from "@stylexjs/stylex";
-import { createFileRoute, Link, } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Loader2, MessageCircle, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { PostForm } from "../components/posts/PostForm";
@@ -9,9 +9,7 @@ import { getCurrentUser } from "../server/functions/auth";
 import { getHomeFeed } from "../server/functions/feed";
 import { colors, fontSize, fontWeight, radii, semanticColors, spacing } from "../tokens.stylex";
 
-export const Route = createFileRoute("/")(
-	{ component: HomePage },
-);
+export const Route = createFileRoute("/")({ component: HomePage });
 
 const styles = stylex.create({
 	container: {
@@ -23,46 +21,110 @@ const styles = stylex.create({
 		paddingTop: spacing["2xl"],
 		paddingBottom: spacing["3xl"],
 	},
-	welcomeWrapper: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "80vh" },
-	welcomeContent: { textAlign: "center", maxWidth: "24rem", paddingLeft: spacing["2xl"], paddingRight: spacing["2xl"] },
+	welcomeWrapper: {
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		minHeight: "80vh",
+	},
+	welcomeContent: {
+		textAlign: "center",
+		maxWidth: "24rem",
+		paddingLeft: spacing["2xl"],
+		paddingRight: spacing["2xl"],
+	},
 	welcomeIcon: {
-		width: "4.5rem", height: "4.5rem", borderRadius: "1.25rem",
+		width: "4.5rem",
+		height: "4.5rem",
+		borderRadius: "1.25rem",
 		backgroundImage: `linear-gradient(135deg, ${colors.indigo500}, ${colors.purple600})`,
-		display: "flex", alignItems: "center", justifyContent: "center",
-		marginLeft: "auto", marginRight: "auto", marginBottom: spacing["2xl"],
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		marginLeft: "auto",
+		marginRight: "auto",
+		marginBottom: spacing["2xl"],
 		boxShadow: "0 12px 28px -6px rgba(99, 102, 241, 0.3)",
 	},
-	welcomeTitle: { fontSize: fontSize["2xl"], fontWeight: fontWeight.bold, color: semanticColors.textPrimary, marginBottom: spacing.sm, letterSpacing: "-0.025em" },
-	welcomeText: { color: semanticColors.textSecondary, marginBottom: spacing["3xl"], fontSize: fontSize.sm, lineHeight: "1.6" },
-	welcomeButton: {
-		display: "inline-flex", alignItems: "center", gap: spacing.sm,
-		paddingLeft: spacing["2xl"], paddingRight: spacing["2xl"], paddingTop: "0.75rem", paddingBottom: "0.75rem",
-		fontSize: fontSize.sm, backgroundImage: `linear-gradient(135deg, ${colors.indigo500}, ${colors.blue600})`,
-		color: colors.white, borderRadius: radii.xl, fontWeight: fontWeight.semibold, textDecoration: "none",
-		transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", boxShadow: "0 4px 14px -2px rgba(99, 102, 241, 0.3)",
-		":hover": { boxShadow: "0 8px 20px -2px rgba(99, 102, 241, 0.4)", transform: "translateY(-1px)" },
+	welcomeTitle: {
+		fontSize: fontSize["2xl"],
+		fontWeight: fontWeight.bold,
+		color: semanticColors.textPrimary,
+		marginBottom: spacing.sm,
+		letterSpacing: "-0.025em",
 	},
-	pageHeader: { display: "flex", alignItems: "center", gap: spacing.md, marginBottom: spacing["2xl"] },
+	welcomeText: {
+		color: semanticColors.textSecondary,
+		marginBottom: spacing["3xl"],
+		fontSize: fontSize.sm,
+		lineHeight: "1.6",
+	},
+	welcomeButton: {
+		display: "inline-flex",
+		alignItems: "center",
+		gap: spacing.sm,
+		paddingLeft: spacing["2xl"],
+		paddingRight: spacing["2xl"],
+		paddingTop: "0.75rem",
+		paddingBottom: "0.75rem",
+		fontSize: fontSize.sm,
+		backgroundImage: `linear-gradient(135deg, ${colors.indigo500}, ${colors.blue600})`,
+		color: colors.white,
+		borderRadius: radii.xl,
+		fontWeight: fontWeight.semibold,
+		textDecoration: "none",
+		transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+		boxShadow: "0 4px 14px -2px rgba(99, 102, 241, 0.3)",
+		":hover": {
+			boxShadow: "0 8px 20px -2px rgba(99, 102, 241, 0.4)",
+			transform: "translateY(-1px)",
+		},
+	},
+	pageHeader: {
+		display: "flex",
+		alignItems: "center",
+		gap: spacing.md,
+		marginBottom: spacing["2xl"],
+	},
 	pageHeaderIcon: {
-		width: "2.25rem", height: "2.25rem", borderRadius: radii.lg,
+		width: "2.25rem",
+		height: "2.25rem",
+		borderRadius: radii.lg,
 		backgroundImage: `linear-gradient(135deg, ${colors.indigo500}, ${colors.purple600})`,
-		display: "flex", alignItems: "center", justifyContent: "center",
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
 		boxShadow: "0 4px 12px -2px rgba(99, 102, 241, 0.25)",
 	},
-	pageTitle: { fontSize: fontSize.xl, fontWeight: fontWeight.bold, color: semanticColors.textPrimary, letterSpacing: "-0.025em" },
+	pageTitle: {
+		fontSize: fontSize.xl,
+		fontWeight: fontWeight.bold,
+		color: semanticColors.textPrimary,
+		letterSpacing: "-0.025em",
+	},
 	pageSubtitle: { fontSize: fontSize.xs, color: semanticColors.textSecondary },
 	formWrapper: { marginBottom: spacing["2xl"] },
 	postsList: { display: "flex", flexDirection: "column", gap: spacing.md },
 	sentinel: { height: "1px" },
-	loadingMore: { display: "flex", justifyContent: "center", paddingTop: spacing.lg, paddingBottom: spacing.lg, color: semanticColors.textTertiary },
-	endMessage: { textAlign: "center", paddingTop: spacing.lg, fontSize: fontSize.sm, color: semanticColors.textTertiary },
+	loadingMore: {
+		display: "flex",
+		justifyContent: "center",
+		paddingTop: spacing.lg,
+		paddingBottom: spacing.lg,
+		color: semanticColors.textTertiary,
+	},
+	endMessage: {
+		textAlign: "center",
+		paddingTop: spacing.lg,
+		fontSize: fontSize.sm,
+		color: semanticColors.textTertiary,
+	},
 	iconWhite: { color: colors.white },
 });
 
 function HomePage() {
 	const [user, setUser] = useState<any>(null);
 	const [userLoading, setUserLoading] = useState(true);
-
 
 	useEffect(() => {
 		getCurrentUser()
@@ -76,10 +138,13 @@ function HomePage() {
 		[],
 	);
 
-	const { items: posts, loading, loadingMore, hasMore, sentinelRef, } = useInfiniteScroll(
-		fetchPage,
-		"home-feed",
-	);
+	const {
+		items: posts,
+		loading,
+		loadingMore,
+		hasMore,
+		sentinelRef,
+	} = useInfiniteScroll(fetchPage, "home-feed");
 
 	if (!user && !userLoading) {
 		return (
@@ -90,7 +155,9 @@ function HomePage() {
 					</div>
 					<h2 {...stylex.props(styles.welcomeTitle)}>Welcome to Vaye</h2>
 					<p {...stylex.props(styles.welcomeText)}>Please log in to view your personalized feed.</p>
-					<Link to="/auth/login" {...stylex.props(styles.welcomeButton)}>Log In</Link>
+					<Link to="/auth/login" {...stylex.props(styles.welcomeButton)}>
+						Log In
+					</Link>
 				</div>
 			</div>
 		);
@@ -115,7 +182,12 @@ function HomePage() {
 			)}
 
 			<div {...stylex.props(styles.postsList)} data-testid="post-feed">
-				<PostList posts={posts} loading={loading} currentUserId={user?.id} onPostDelete={() => window.location.reload()} />
+				<PostList
+					posts={posts}
+					loading={loading}
+					currentUserId={user?.id}
+					onPostDelete={() => window.location.reload()}
+				/>
 			</div>
 
 			{/* Infinite scroll sentinel */}

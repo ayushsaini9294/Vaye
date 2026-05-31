@@ -24,7 +24,9 @@ test.describe("Drafts & Content Warnings", () => {
 
 		// Come back
 		await page.goto("/", { waitUntil: "networkidle" });
-		await expect(page.locator('[data-testid="post-textarea"]')).toHaveValue(draftText, { timeout: 5000 });
+		await expect(page.locator('[data-testid="post-textarea"]')).toHaveValue(draftText, {
+			timeout: 5000,
+		});
 	});
 
 	// ── 2. Draft badge appears on restore ────────────────────────────────────

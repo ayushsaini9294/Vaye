@@ -63,7 +63,7 @@ export function useInfiniteScroll<T>(
 		return () => {
 			cancelled = true;
 		};
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [key]);
 
 	// IntersectionObserver on sentinel
@@ -112,7 +112,7 @@ export function useInfiniteScroll<T>(
 				timeoutId = 0;
 			}, 100);
 		};
-		
+
 		window.addEventListener("scroll", handleScroll, { passive: true });
 		return () => {
 			window.removeEventListener("scroll", handleScroll);

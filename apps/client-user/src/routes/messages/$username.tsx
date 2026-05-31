@@ -1,14 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMessages, sendMessage, markAsRead } from "../../server/functions/chat";
-import { getUser } from "../../server/functions/users";
-import { getCurrentUser } from "../../server/functions/auth";
-import { UserAvatar } from "../../components/users/UserAvatar";
 import * as stylex from "@stylexjs/stylex";
-import { colors, spacing, fontSize, fontWeight } from "../../tokens.stylex";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft, CheckCheck, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send, CheckCheck } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { UserAvatar } from "../../components/users/UserAvatar";
+import { getCurrentUser } from "../../server/functions/auth";
+import { getMessages, markAsRead, sendMessage } from "../../server/functions/chat";
+import { getUser } from "../../server/functions/users";
+import { colors, fontSize, fontWeight, spacing } from "../../tokens.stylex";
 
 export const Route = createFileRoute("/messages/$username")({
 	component: ChatView,
@@ -323,14 +322,11 @@ function ChatView() {
 		queryKey: ["conversations"],
 	});
 
-	const conversation = (conversations as any[])?.find(
-		(c) => c.otherUser?.username === username,
-	);
+	const conversation = (conversations as any[])?.find((c) => c.otherUser?.username === username);
 
 	const { data: messages } = useQuery({
 		queryKey: ["messages", conversation?.id],
-		queryFn: () =>
-			getMessages({ data: { conversationId: conversation!.id } }),
+		queryFn: () => getMessages({ data: { conversationId: conversation!.id } }),
 		enabled: !!conversation?.id,
 		refetchInterval: 3000,
 	});
@@ -396,20 +392,14 @@ function ChatView() {
 				<Link to="/messages" {...stylex.props(styles.backButton)}>
 					<ArrowLeft size={20} />
 				</Link>
-				<Link
-					to="/users/$username"
-					params={{ username }}
-					{...stylex.props(styles.headerInfo)}
-				>
+				<Link to="/users/$username" params={{ username }} {...stylex.props(styles.headerInfo)}>
 					<UserAvatar
 						avatarUrl={otherUser.avatarUrl || undefined}
 						username={otherUser.username}
 						size="md"
 					/>
 					<div {...stylex.props(styles.headerText)}>
-						<div {...stylex.props(styles.displayName)}>
-							{otherUser.displayName}
-						</div>
+						<div {...stylex.props(styles.displayName)}>{otherUser.displayName}</div>
 						<div {...stylex.props(styles.username)}>@{username}</div>
 					</div>
 				</Link>
@@ -423,8 +413,7 @@ function ChatView() {
 							<Send size={28} />
 						</div>
 						<p {...stylex.props(styles.emptyChatText)}>
-							Send a message to start chatting with{" "}
-							<strong>{otherUser.displayName}</strong>
+							Send a message to start chatting with <strong>{otherUser.displayName}</strong>
 						</p>
 					</div>
 				)}
@@ -457,12 +446,7 @@ function ChatView() {
 							{showTime && (
 								<div {...stylex.props(styles.messageTime)}>
 									{formatMessageTime(msg.createdAt)}
-									{isSelf && (
-										<CheckCheck
-											size={12}
-											{...stylex.props(styles.readIcon)}
-										/>
-									)}
+									{isSelf && <CheckCheck size={12} {...stylex.props(styles.readIcon)} />}
 								</div>
 							)}
 						</div>
@@ -473,10 +457,7 @@ function ChatView() {
 
 			{/* Input area */}
 			<div {...stylex.props(styles.inputArea)}>
-				<form
-					onSubmit={handleSubmit}
-					{...stylex.props(styles.inputForm)}
-				>
+				<form onSubmit={handleSubmit} {...stylex.props(styles.inputForm)}>
 					<input
 						ref={inputRef}
 						{...stylex.props(styles.textInput)}
@@ -490,8 +471,7 @@ function ChatView() {
 						disabled={!content.trim() || sendMutation.isPending}
 						{...stylex.props(
 							styles.sendButton,
-							(!content.trim() || sendMutation.isPending) &&
-								styles.sendButtonDisabled,
+							(!content.trim() || sendMutation.isPending) && styles.sendButtonDisabled,
 						)}
 					>
 						<Send size={18} />

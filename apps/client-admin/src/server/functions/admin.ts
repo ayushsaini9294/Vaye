@@ -19,7 +19,10 @@ export const getDashboardStatsFn = createServerFn({ method: "GET" }).handler(asy
 });
 
 export const getUsersFn = createServerFn({ method: "GET" })
-	.inputValidator((d: { page?: number; limit?: number; searchQuery?: string; roleFilter?: string } | undefined) => d || {})
+	.inputValidator(
+		(d: { page?: number; limit?: number; searchQuery?: string; roleFilter?: string } | undefined) =>
+			d || {},
+	)
 	.handler(async ({ data }) => {
 		const sessionToken = await requireAdminToken();
 		const client = getGrpcClient();
@@ -71,7 +74,11 @@ export const getPostsFn = createServerFn({ method: "GET" })
 	});
 
 export const getReportsFn = createServerFn({ method: "GET" })
-	.inputValidator((d: { page?: number; limit?: number; statusFilter?: string; typeFilter?: string } | undefined) => d || {})
+	.inputValidator(
+		(
+			d: { page?: number; limit?: number; statusFilter?: string; typeFilter?: string } | undefined,
+		) => d || {},
+	)
 	.handler(async ({ data }) => {
 		const sessionToken = await requireAdminToken();
 		const client = getGrpcClient();
@@ -91,13 +98,21 @@ export const getReportsFn = createServerFn({ method: "GET" })
 			reports: response.reports.map((report) => ({
 				...report,
 				createdAt: fromProtoTimestamp(report.createdAt).toISOString(),
-				reviewedAt: report.reviewedAt ? fromProtoTimestamp(report.reviewedAt).toISOString() : undefined,
+				reviewedAt: report.reviewedAt
+					? fromProtoTimestamp(report.reviewedAt).toISOString()
+					: undefined,
 			})),
 		};
 	});
 
 export const getAuditLogsFn = createServerFn({ method: "GET" })
-	.inputValidator((d: { page?: number; limit?: number; adminIdFilter?: string; actionFilter?: string } | undefined) => d || {})
+	.inputValidator(
+		(
+			d:
+				| { page?: number; limit?: number; adminIdFilter?: string; actionFilter?: string }
+				| undefined,
+		) => d || {},
+	)
 	.handler(async ({ data }) => {
 		const sessionToken = await requireAdminToken();
 		const client = getGrpcClient();
@@ -210,4 +225,3 @@ export const updateUserRoleFn = createServerFn({ method: "POST" })
 
 		return response;
 	});
-

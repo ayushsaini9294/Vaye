@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
 import * as stylex from "@stylexjs/stylex";
+import { createFileRoute } from "@tanstack/react-router";
+import { ArrowRight, MessageCircle, Send } from "lucide-react";
 import { colors, fontSize, fontWeight, spacing } from "../../tokens.stylex";
-import { MessageCircle, Send, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/messages/")({
 	component: MessagesIndex,

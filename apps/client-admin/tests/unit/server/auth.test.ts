@@ -103,7 +103,10 @@ describe("Admin Auth Server Functions", () => {
 			vi.mocked(getGrpcClient).mockReturnValue(mockClient as any);
 			vi.mocked(setAdminSessionData).mockResolvedValue(undefined);
 
-			const result = await callLoginAdmin({ email: "ayushsaini9294@gmail.com", password: "password123" });
+			const result = await callLoginAdmin({
+				email: "ayushsaini9294@gmail.com",
+				password: "password123",
+			});
 
 			expect(result.success).toBe(true);
 			expect(result.userId).toBe("user-123");

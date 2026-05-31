@@ -1,3 +1,5 @@
+import { Server, ServerCredentials } from "@grpc/grpc-js";
+import { adaptService } from "@protobuf-ts/grpc-backend";
 import {
 	AdminService,
 	AuthService,
@@ -12,8 +14,6 @@ import {
 	SearchService,
 	UsersService,
 } from "@vaye/proto";
-import { Server, ServerCredentials } from "@grpc/grpc-js";
-import { adaptService } from "@protobuf-ts/grpc-backend";
 import { adminHandler } from "./handlers/admin.handler";
 import { authHandler } from "./handlers/auth.handler";
 import { bookmarksHandler } from "./handlers/bookmarks.handler";

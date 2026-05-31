@@ -1,12 +1,6 @@
 import * as stylex from "@stylexjs/stylex";
 import { AtSign } from "lucide-react";
-import {
-	forwardRef,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-	useState,
-} from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { searchUsers } from "../../server/functions/search";
 import { colors, radii, semanticColors, shadows, spacing, zIndex } from "../../tokens.stylex";
 import { UserAvatar } from "../users/UserAvatar";
@@ -122,7 +116,10 @@ interface MentionAutocompleteProps {
  * Detect @-mention token being typed. Returns null if cursor is NOT inside
  * a valid mention context (e.g. email@domain won't trigger).
  */
-function detectMentionQuery(text: string, cursorPos: number): { query: string; start: number } | null {
+function detectMentionQuery(
+	text: string,
+	cursorPos: number,
+): { query: string; start: number } | null {
 	const before = text.slice(0, cursorPos);
 	const atIdx = before.lastIndexOf("@");
 	if (atIdx === -1) return null;
@@ -154,7 +151,8 @@ export const MentionAutocomplete = forwardRef<MentionAutocompleteHandle, Mention
 		activeIndexRef.current = activeIndex;
 
 		const mention = detectMentionQuery(text, cursorPos);
-		const isOpen = !dismissed && mention !== null && mention.query.length > 0 && (loading || users.length > 0);
+		const isOpen =
+			!dismissed && mention !== null && mention.query.length > 0 && (loading || users.length > 0);
 
 		const isOpenRef = useRef(isOpen);
 		isOpenRef.current = isOpen;
@@ -288,11 +286,7 @@ export const MentionAutocomplete = forwardRef<MentionAutocompleteHandle, Mention
 									}}
 									{...stylex.props(styles.item, idx === activeIndex && styles.itemActive)}
 								>
-									<UserAvatar
-										avatarUrl={user.avatarUrl}
-										username={user.username}
-										size="sm"
-									/>
+									<UserAvatar avatarUrl={user.avatarUrl} username={user.username} size="sm" />
 									<div {...stylex.props(styles.itemText)}>
 										<span {...stylex.props(styles.displayName)}>{user.displayName}</span>
 										<span {...stylex.props(styles.username)}>@{user.username}</span>
