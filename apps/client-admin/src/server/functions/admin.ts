@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import {
 	type AuditLog,
@@ -370,7 +369,7 @@ export const updateUserRoleFn = createServerFn({ method: "POST" })
 			.where(eq(users.id, data.userId));
 
 		await db.insert(auditLogs).values({
-			id: crypto.randomUUID(),
+			id: globalThis.crypto.randomUUID(),
 			adminId: session.userId,
 			action: "update_role",
 			targetType: "user",
