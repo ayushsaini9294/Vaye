@@ -16,10 +16,10 @@
 		"test:e2e": "playwright test"
 	},
 	"dependencies": {
-		"@vaye/grpc-client": "workspace:*",
-		"@vaye/proto": "workspace:*",
+		"@vaye/db-schema": "workspace:*",
 		"@vaye/ui": "workspace:*",
-		"@grpc/grpc-js": "^1.12.6",
+		"drizzle-orm": "^0.45.1",
+		"@libsql/client": "^0.14.0",
 		"@stylexjs/stylex": "^0.17.5",
 		"@tanstack/react-devtools": "^0.7.0",
 		"@tanstack/react-query": "^5.90.16",

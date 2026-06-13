@@ -1,5 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
-import { fromProtoTimestamp, getAdminGrpcSessionToken, getGrpcClient } from "../../lib/grpc.server";
+import { db } from "@vaye/db-schema/db";
+import { users } from "@vaye/db-schema";
+import { eq } from "drizzle-orm";
+import { verifyPassword } from "@vaye/db-schema/utils";
 import {
 	clearAdminSessionData,
 	getAdminSessionData,
@@ -9,51 +12,34 @@ import {
 export const loginAdmin = createServerFn({ method: "POST" })
 	.inputValidator((d: { email: string; password: string }) => d)
 	.handler(async ({ data }) => {
-		const client = getGrpcClient();
-
-		// First, attempt to login
-		const { response: loginResponse } = await client.auth.login({
-			email: data.email,
-			password: data.password,
+		const user = await db.query.users.findFirst({
+			where: eq(users.email, data.email),
 		});
 
-		if (!loginResponse.success) {
-			throw new Error(loginResponse.error || "Login failed");
+		if (!user) {
+			throw new Error("Invalid email or password");
 		}
 
-		// Validate the session to get user details including role
-		const { response: validateResponse } = await client.auth.validateSession({
-			sessionToken: loginResponse.sessionToken,
-		});
-
-		if (!validateResponse.valid) {
-			throw new Error("Failed to validate session");
+		const isValid = await verifyPassword(user.passwordHash, data.password);
+		if (!isValid) {
+			throw new Error("Invalid email or password");
 		}
 
-		// Check if user has admin or moderator role
-		const role = validateResponse.role;
-		if (role !== "admin" && role !== "moderator") {
-			// Logout the session since they don't have admin access
-			await client.auth.logout({ sessionToken: loginResponse.sessionToken });
+		if (user.role !== "admin" && user.role !== "moderator") {
 			throw new Error("Access denied. Admin or moderator role required.");
 		}
 
 		// Store admin session in cookie
 		await setAdminSessionData({
-			userId: loginResponse.userId,
-			username: validateResponse.username,
-			role: role as "admin" | "moderator",
+			userId: user.id,
+			username: user.username,
+			role: user.role,
 		});
 
-		return { success: true, userId: loginResponse.userId, role };
+		return { success: true, userId: user.id, role: user.role };
 	});
 
 export const logoutAdmin = createServerFn({ method: "POST" }).handler(async () => {
-	const sessionToken = await getAdminGrpcSessionToken();
-	if (sessionToken) {
-		const client = getGrpcClient();
-		await client.auth.logout({ sessionToken });
-	}
 	await clearAdminSessionData();
 	return { success: true };
 });
@@ -62,30 +48,24 @@ export const getCurrentAdmin = createServerFn().handler(async () => {
 	const session = await getAdminSessionData();
 	if (!session) return null;
 
-	const sessionToken = await getAdminGrpcSessionToken();
-	if (!sessionToken) {
-		await clearAdminSessionData();
-		return null;
-	}
-
 	try {
-		const client = getGrpcClient();
-		const { response } = await client.auth.getCurrentUser({ sessionToken });
+		const user = await db.query.users.findFirst({
+			where: eq(users.id, session.userId),
+		});
 
-		// Double-check role from the server
-		if (response.role !== "admin" && response.role !== "moderator") {
+		if (!user || (user.role !== "admin" && user.role !== "moderator")) {
 			await clearAdminSessionData();
 			return null;
 		}
 
 		return {
-			id: response.id,
-			email: response.email,
-			username: response.username,
-			displayName: response.displayName,
-			avatarUrl: response.avatarUrl,
-			role: response.role as "admin" | "moderator",
-			createdAt: fromProtoTimestamp(response.createdAt),
+			id: user.id,
+			email: user.email,
+			username: user.username,
+			displayName: user.displayName,
+			avatarUrl: user.avatarUrl ?? undefined,
+			role: user.role as "admin" | "moderator",
+			createdAt: user.createdAt,
 		};
 	} catch {
 		await clearAdminSessionData();

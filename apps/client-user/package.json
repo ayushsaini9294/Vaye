@@ -17,10 +17,7 @@
 	},
 	"dependencies": {
 		"@vaye/db-schema": "workspace:*",
-		"@vaye/grpc-client": "workspace:*",
-		"@vaye/proto": "workspace:*",
 		"@vaye/ui": "workspace:*",
-		"@grpc/grpc-js": "^1.12.6",
 		"@stylexjs/stylex": "^0.17.5",
 		"@tanstack/react-devtools": "^0.7.0",
 		"@tanstack/react-query": "^5.90.16",
