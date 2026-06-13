@@ -1,6 +1,6 @@
+import { createServerFn } from "@tanstack/react-start";
 import { db, schema } from "@vaye/db-schema/db";
 import { generateId } from "@vaye/db-schema/utils";
-import { createServerFn } from "@tanstack/react-start";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { getSessionData, requireAuth } from "../../lib/session.server";
 
@@ -17,11 +17,7 @@ export const createComment = createServerFn({ method: "POST" })
 		if (!post) throw new Error("Post not found");
 
 		if (data.parentId) {
-			const parent = await db
-				.select()
-				.from(comments)
-				.where(eq(comments.id, data.parentId))
-				.get();
+			const parent = await db.select().from(comments).where(eq(comments.id, data.parentId)).get();
 			if (!parent) throw new Error("Parent comment not found");
 			if (parent.parentId) throw new Error("Cannot reply to a reply");
 		}
@@ -150,7 +146,8 @@ export const deleteComment = createServerFn({ method: "POST" })
 		const comment = await db.select().from(comments).where(eq(comments.id, commentId)).get();
 
 		if (!comment) throw new Error("Comment not found");
-		if (comment.authorId !== session.userId) throw new Error("You can only delete your own comments");
+		if (comment.authorId !== session.userId)
+			throw new Error("You can only delete your own comments");
 
 		await db.delete(comments).where(eq(comments.id, commentId));
 		return { success: true };

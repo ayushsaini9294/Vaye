@@ -1,5 +1,5 @@
-import { db, schema } from "@vaye/db-schema/db";
 import { createServerFn } from "@tanstack/react-start";
+import { db, schema } from "@vaye/db-schema/db";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { requireAuth } from "../../lib/session.server";
 
@@ -88,10 +88,7 @@ export const markAsRead = createServerFn({ method: "POST" })
 		if (!notification) throw new Error("Notification not found");
 		if (notification.userId !== session.userId) throw new Error("Unauthorized");
 
-		await db
-			.update(notifications)
-			.set({ read: true })
-			.where(eq(notifications.id, notificationId));
+		await db.update(notifications).set({ read: true }).where(eq(notifications.id, notificationId));
 		return { success: true };
 	});
 

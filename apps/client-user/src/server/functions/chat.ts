@@ -1,6 +1,6 @@
+import { createServerFn } from "@tanstack/react-start";
 import { db, schema } from "@vaye/db-schema/db";
 import { generateId } from "@vaye/db-schema/utils";
-import { createServerFn } from "@tanstack/react-start";
 import { and, desc, eq, or, sql } from "drizzle-orm";
 import { requireAuth } from "../../lib/session.server";
 
@@ -128,12 +128,16 @@ export const sendMessage = createServerFn({ method: "POST" })
 		});
 
 		// Update conversation timestamp
-		await db
-			.update(conversations)
-			.set({ updatedAt: now })
-			.where(eq(conversations.id, conv.id));
+		await db.update(conversations).set({ updatedAt: now }).where(eq(conversations.id, conv.id));
 
-		return { id: messageId, conversationId: conv.id, senderId: userId, content: data.content, read: false, createdAt: now };
+		return {
+			id: messageId,
+			conversationId: conv.id,
+			senderId: userId,
+			content: data.content,
+			read: false,
+			createdAt: now,
+		};
 	});
 
 // ─── Mark Conversation as Read ───────────────────────────────────────────────
@@ -148,7 +152,7 @@ export const markAsRead = createServerFn({ method: "POST" })
 			.where(
 				and(
 					eq(messages.conversationId, conversationId),
-					sql`${messages.senderId} != ${session.userId}`
+					sql`${messages.senderId} != ${session.userId}`,
 				),
 			);
 

@@ -1,6 +1,6 @@
 import { createClient } from "@libsql/client";
-import * as schema from "./schema";
 import { drizzle } from "drizzle-orm/libsql";
+import * as schema from "./schema";
 
 // Shared DB client — used by both client-user and client-admin server functions.
 // In development: reads from local vaye.db file.

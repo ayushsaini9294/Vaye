@@ -36,8 +36,8 @@ importers:
         specifier: ^1.12.6
         version: 1.14.3
       '@libsql/client':
-        specifier: ^0.17.0
-        version: 0.17.0
+        specifier: ^0.14.0
+        version: 0.14.0
       '@protobuf-ts/grpc-backend':
         specifier: ^2.9.4
         version: 2.11.1(@grpc/grpc-js@1.14.3)
@@ -58,7 +58,7 @@ importers:
         version: link:../../packages/shared-types
       drizzle-orm:
         specifier: ^0.45.1
-        version: 0.45.1(@libsql/client@0.17.0)(kysely@0.28.10)
+        version: 0.45.1(@libsql/client@0.14.0)(kysely@0.28.10)
       elysia:
         specifier: ^1.2.25
         version: 1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3)
@@ -2791,6 +2791,7 @@ packages:
 
   libsql@0.5.22:
     resolution: {integrity: sha512-NscWthMQt7fpU8lqd7LXMvT9pi+KhhmTHAJWUB/Lj6MWa0MKFv0F2V4C6WKKpjCVZl0VwcDz4nOI3CyaT1DDiA==}
+    cpu: [x64, arm64, wasm32, arm]
     os: [darwin, linux, win32]
 
   lightningcss-android-arm64@1.30.2:
@@ -4211,6 +4212,7 @@ snapshots:
       - bufferutil
       - encoding
       - utf-8-validate
+    optional: true
 
   '@libsql/core@0.14.0':
     dependencies:
@@ -4219,6 +4221,7 @@ snapshots:
   '@libsql/core@0.17.0':
     dependencies:
       js-base64: 3.7.8
+    optional: true
 
   '@libsql/darwin-arm64@0.4.7':
     optional: true
@@ -4252,6 +4255,7 @@ snapshots:
       - bufferutil
       - encoding
       - utf-8-validate
+    optional: true
 
   '@libsql/isomorphic-fetch@0.3.1': {}
 
@@ -5278,6 +5282,7 @@ snapshots:
       node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
+    optional: true
 
   crossws@0.4.4(srvx@0.10.1):
     optionalDependencies:
@@ -5396,6 +5401,7 @@ snapshots:
     optionalDependencies:
       '@libsql/client': 0.17.0
       kysely: 0.28.10
+    optional: true
 
   dunder-proto@1.0.1:
     dependencies:
@@ -5848,6 +5854,7 @@ snapshots:
       '@libsql/linux-x64-gnu': 0.5.22
       '@libsql/linux-x64-musl': 0.5.22
       '@libsql/win32-x64-msvc': 0.5.22
+    optional: true
 
   lightningcss-android-arm64@1.30.2:
     optional: true
@@ -6061,6 +6068,7 @@ snapshots:
   node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
+    optional: true
 
   node-fetch@3.3.2:
     dependencies:
@@ -6393,7 +6401,8 @@ snapshots:
     dependencies:
       tldts: 7.0.19
 
-  tr46@0.0.3: {}
+  tr46@0.0.3:
+    optional: true
 
   tr46@5.1.1:
     dependencies:
@@ -6630,7 +6639,8 @@ snapshots:
 
   web-streams-polyfill@3.3.3: {}
 
-  webidl-conversions@3.0.1: {}
+  webidl-conversions@3.0.1:
+    optional: true
 
   webidl-conversions@7.0.0: {}
 
@@ -6660,6 +6670,7 @@ snapshots:
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
+    optional: true
 
   why-is-node-running@2.3.0:
     dependencies:

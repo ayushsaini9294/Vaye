@@ -15,8 +15,11 @@ export const Route = createFileRoute("/posts/$postId")({
 
 function PostPage() {
 	const { postId } = Route.useParams();
+	// biome-ignore lint/suspicious/noExplicitAny: needs proper typing
 	const [post, setPost] = useState<any>(null);
+	// biome-ignore lint/suspicious/noExplicitAny: needs proper typing
 	const [comments, setComments] = useState<any[]>([]);
+	// biome-ignore lint/suspicious/noExplicitAny: needs proper typing
 	const [user, setUser] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
 
@@ -130,6 +133,7 @@ function PostPage() {
 							{comments.map((comment) => (
 								<div key={comment.id}>
 									<CommentCard comment={comment} currentUserId={user?.id} onDelete={loadData} />
+									{/* biome-ignore lint/suspicious/noExplicitAny: needs proper typing */}
 									{comment.replies?.map((reply: any) => (
 										<div key={reply.id} className="ml-8 pl-4 border-l-2 border-gray-100">
 											<CommentCard comment={reply} currentUserId={user?.id} onDelete={loadData} />

@@ -1,6 +1,6 @@
+import { createServerFn } from "@tanstack/react-start";
 import { db, schema } from "@vaye/db-schema/db";
 import { generateId, hashPassword, verifyPassword } from "@vaye/db-schema/utils";
-import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { clearSessionData, getSessionData, setSessionData } from "../../lib/session.server";
 
@@ -48,7 +48,8 @@ export const loginUser = createServerFn({ method: "POST" })
 		const user = await db.select().from(users).where(eq(users.email, data.email)).get();
 		if (!user) throw new Error("Invalid email or password");
 
-		if (user.bannedAt) throw new Error(`Account banned: ${user.bannedReason || "No reason provided"}`);
+		if (user.bannedAt)
+			throw new Error(`Account banned: ${user.bannedReason || "No reason provided"}`);
 
 		const valid = await verifyPassword(data.password, user.passwordHash);
 		if (!valid) throw new Error("Invalid email or password");

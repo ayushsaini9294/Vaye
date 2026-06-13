@@ -20,7 +20,7 @@
 		"@vaye/proto": "workspace:*",
 		"@vaye/shared-types": "workspace:*",
 		"@grpc/grpc-js": "^1.12.6",
-		"@libsql/client": "^0.17.0",
+		"@libsql/client": "^0.14.0",
 		"@protobuf-ts/grpc-backend": "^2.9.4",
 		"@protobuf-ts/runtime": "^2.9.4",
 		"@protobuf-ts/runtime-rpc": "^2.9.4",

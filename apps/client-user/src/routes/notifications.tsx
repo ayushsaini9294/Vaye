@@ -129,7 +129,9 @@ export const Route = createFileRoute("/notifications")({
 });
 
 function NotificationsPage() {
+	// biome-ignore lint/suspicious/noExplicitAny: needs proper typing
 	const [notifications, setNotifications] = useState<any[]>([]);
+	// biome-ignore lint/suspicious/noExplicitAny: needs proper typing
 	const [user, setUser] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
 	const [markingAll, setMarkingAll] = useState(false);

@@ -1,6 +1,6 @@
+import { createServerFn } from "@tanstack/react-start";
 import { db, schema } from "@vaye/db-schema/db";
 import { generateId } from "@vaye/db-schema/utils";
-import { createServerFn } from "@tanstack/react-start";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { getSessionData, requireAuth } from "../../lib/session.server";
 
@@ -28,9 +28,7 @@ export const toggleFollow = createServerFn({ method: "POST" })
 			return { success: true, following: false };
 		}
 
-		await db
-			.insert(follows)
-			.values({ id: generateId(), followerId, followingId: userToFollow.id });
+		await db.insert(follows).values({ id: generateId(), followerId, followingId: userToFollow.id });
 
 		// Notify the followed user
 		if (userToFollow.id !== followerId) {
