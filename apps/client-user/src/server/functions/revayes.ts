@@ -1,6 +1,9 @@
+import { db, schema } from "@vaye/db-schema/db";
 import { createServerFn } from "@tanstack/react-start";
-import { fromProtoTimestamp, getGrpcClient, getGrpcSessionToken } from "../../lib/grpc.server";
+import { desc, eq, inArray } from "drizzle-orm";
 import { getSessionData, requireAuth } from "../../lib/session.server";
+
+const { users, posts } = schema;
 
 /**
  * Concurrency-safe in-memory stub for revaye state.
@@ -96,18 +99,7 @@ export const getRevayeStatus = createServerFn()
 export const getUserRevayes = createServerFn()
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: username }) => {
-		const sessionToken = await getGrpcSessionToken();
-		const client = getGrpcClient();
-
-		// Resolve the reposter's display name
-		const { response: userResp } = await client.users.getUser({
-			sessionToken: sessionToken || "",
-			username,
-		});
-		const reposterDisplayName = userResp.displayName || username;
-		const reposterUsername = userResp.username || username;
-
-		// Collect postIds that have at least one revayeer tracked in-store
+		// Collect postIds that have been revayeed by any user
 		const revayeedPostIds = new Set<string>();
 		for (const [postId, revayeers] of revayesByPost.entries()) {
 			if (revayeers.size > 0) revayeedPostIds.add(postId);
@@ -115,39 +107,44 @@ export const getUserRevayes = createServerFn()
 
 		if (revayeedPostIds.size === 0) return [];
 
-		const { response: postsResp } = await client.posts.getPosts({
-			sessionToken: sessionToken || "",
-			pagination: { limit: 100, offset: 0 },
-		});
+		// Get the reposter's profile from DB
+		const reposter = await db
+			.select({ id: users.id, username: users.username, displayName: users.displayName })
+			.from(users)
+			.where(eq(users.username, username))
+			.get();
 
-		return postsResp.posts
-			.filter(
-				(p) =>
-					// Exclude the user's own posts
-					p.author?.username !== username &&
-					// Include only revayeed posts
-					revayeedPostIds.has(p.id),
-			)
+		if (!reposter) return [];
+
+		// Fetch the revayeed posts directly from DB
+		const postIds = Array.from(revayeedPostIds);
+		const result = await db
+			.select({
+				id: posts.id,
+				content: posts.content,
+				createdAt: posts.createdAt,
+				updatedAt: posts.updatedAt,
+				author: {
+					id: users.id,
+					username: users.username,
+					displayName: users.displayName,
+					avatarUrl: users.avatarUrl,
+				},
+			})
+			.from(posts)
+			.leftJoin(users, eq(posts.authorId, users.id))
+			.where(inArray(posts.id, postIds))
+			.orderBy(desc(posts.createdAt));
+
+		// Exclude the user's own posts from their revaye feed
+		return result
+			.filter((p) => p.author?.username !== username)
 			.map((post) => ({
-				id: post.id,
-				content: post.content,
-				createdAt: fromProtoTimestamp(post.createdAt),
-				updatedAt: fromProtoTimestamp(post.updatedAt),
-				author: post.author
-					? {
-							id: post.author.id,
-							username: post.author.username,
-							displayName: post.author.displayName,
-							avatarUrl: post.author.avatarUrl,
-						}
-					: null,
-				likeCount: post.likeCount,
-				commentCount: post.commentCount,
+				...post,
+				likeCount: 0,
+				commentCount: 0,
 				revayeCount: revayeCounts.get(post.id) ?? 0,
 				isRevayeed: true,
-				repostedBy: {
-					username: reposterUsername,
-					displayName: reposterDisplayName,
-				},
+				repostedBy: { username: reposter.username, displayName: reposter.displayName },
 			}));
 	});

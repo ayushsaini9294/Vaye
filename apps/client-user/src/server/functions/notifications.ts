@@ -1,89 +1,124 @@
+import { db, schema } from "@vaye/db-schema/db";
 import { createServerFn } from "@tanstack/react-start";
-import { fromProtoTimestamp, getGrpcClient, requireGrpcSessionToken } from "../../lib/grpc.server";
+import { and, desc, eq, sql } from "drizzle-orm";
+import { requireAuth } from "../../lib/session.server";
 
+const { notifications, users, posts, comments } = schema;
+
+// ─── Get Notifications ───────────────────────────────────────────────────────
 export const getNotifications = createServerFn()
 	.inputValidator((d: { limit?: number; offset?: number }) => d)
 	.handler(async ({ data }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await requireAuth();
+		const limit = data.limit || 20;
+		const offset = data.offset || 0;
 
-		const { response } = await client.notifications.getNotifications({
-			sessionToken,
-			limit: data.limit || 20,
-			offset: data.offset || 0,
-		});
+		const results = await db
+			.select({
+				id: notifications.id,
+				type: notifications.type,
+				read: notifications.read,
+				createdAt: notifications.createdAt,
+				postId: notifications.postId,
+				commentId: notifications.commentId,
+				actor: {
+					id: users.id,
+					username: users.username,
+					displayName: users.displayName,
+					avatarUrl: users.avatarUrl,
+				},
+			})
+			.from(notifications)
+			.leftJoin(users, eq(notifications.actorId, users.id))
+			.where(eq(notifications.userId, session.userId))
+			.orderBy(desc(notifications.createdAt))
+			.limit(limit)
+			.offset(offset);
 
-		return response.notifications.map((n) => ({
-			id: n.id,
-			type: n.type,
-			read: n.read,
-			actor: n.actor,
-			postId: n.postId,
-			commentId: n.commentId,
-			postContent: n.postContent,
-			commentContent: n.commentContent,
-			createdAt: fromProtoTimestamp(n.createdAt),
-		}));
+		return Promise.all(
+			results.map(async (n) => {
+				let postContent: string | null = null;
+				let commentContent: string | null = null;
+
+				if (n.postId) {
+					const post = await db
+						.select({ content: posts.content })
+						.from(posts)
+						.where(eq(posts.id, n.postId))
+						.get();
+					postContent = post?.content?.substring(0, 100) || null;
+				}
+
+				if (n.commentId) {
+					const comment = await db
+						.select({ content: comments.content })
+						.from(comments)
+						.where(eq(comments.id, n.commentId))
+						.get();
+					commentContent = comment?.content?.substring(0, 100) || null;
+				}
+
+				return { ...n, postContent, commentContent };
+			}),
+		);
 	});
 
+// ─── Get Unread Count ────────────────────────────────────────────────────────
 export const getUnreadCount = createServerFn().handler(async () => {
-	const sessionToken = await requireGrpcSessionToken();
-	const client = getGrpcClient();
-
-	const { response } = await client.notifications.getUnreadCount({
-		sessionToken,
-	});
-
-	return response.count;
+	const session = await requireAuth();
+	const result = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(notifications)
+		.where(and(eq(notifications.userId, session.userId), eq(notifications.read, false)))
+		.get();
+	return result?.count || 0;
 });
 
+// ─── Mark One As Read ────────────────────────────────────────────────────────
 export const markAsRead = createServerFn({ method: "POST" })
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: notificationId }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await requireAuth();
+		const notification = await db
+			.select()
+			.from(notifications)
+			.where(eq(notifications.id, notificationId))
+			.get();
 
-		const { response } = await client.notifications.markAsRead({
-			sessionToken,
-			notificationId,
-		});
+		if (!notification) throw new Error("Notification not found");
+		if (notification.userId !== session.userId) throw new Error("Unauthorized");
 
-		if (!response.success) {
-			throw new Error(response.error || "Failed to mark notification as read");
-		}
-
+		await db
+			.update(notifications)
+			.set({ read: true })
+			.where(eq(notifications.id, notificationId));
 		return { success: true };
 	});
 
+// ─── Mark All As Read ────────────────────────────────────────────────────────
 export const markAllAsRead = createServerFn({ method: "POST" }).handler(async () => {
-	const sessionToken = await requireGrpcSessionToken();
-	const client = getGrpcClient();
-
-	const { response } = await client.notifications.markAllAsRead({
-		sessionToken,
-	});
-
-	if (!response.success) {
-		throw new Error(response.error || "Failed to mark all notifications as read");
-	}
-
+	const session = await requireAuth();
+	await db
+		.update(notifications)
+		.set({ read: true })
+		.where(eq(notifications.userId, session.userId));
 	return { success: true };
 });
 
+// ─── Delete Notification ─────────────────────────────────────────────────────
 export const deleteNotification = createServerFn({ method: "POST" })
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: notificationId }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await requireAuth();
+		const notification = await db
+			.select()
+			.from(notifications)
+			.where(eq(notifications.id, notificationId))
+			.get();
 
-		const { response } = await client.notifications.deleteNotification({
-			sessionToken,
-			notificationId,
-		});
+		if (!notification) throw new Error("Notification not found");
+		if (notification.userId !== session.userId) throw new Error("Unauthorized");
 
-		if (!response.success) {
-			throw new Error(response.error || "Failed to delete notification");
-		}
-
+		await db.delete(notifications).where(eq(notifications.id, notificationId));
 		return { success: true };
 	});

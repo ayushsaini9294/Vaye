@@ -1,17 +1,17 @@
 # Vaye - Social Media Platform
 
-A Twitter-like social media platform built as a monorepo with TanStack Start, React 19, gRPC, StyleX, and SQLite.
+A Twitter-like social media platform built as a monorepo with TanStack Start, React 19, StyleX, and SQLite (Serverless/Turso).
 
 > NOTE: Task details are documented in TASK.md
 > **New Developer?** Learn how to build this [from scratch here](./BUILD_FROM_SCRATCH.md).
 
 ## Architecture
 
-Vaye is a full-stack monorepo application with:
+Vaye is a full-stack monorepo application using a modern Serverless setup:
 
-- **User App** (`apps/client-user`) - Consumer-facing social media application
+- **User App** (`apps/client-user`) - Consumer-facing social media application (Direct DB connection)
 - **Admin App** (`apps/client-admin`) - Administrative dashboard for content moderation
-- **API Server** (`apps/api`) - gRPC-based backend service
+- **Shared DB Schema** (`packages/db-schema`) - Shared Drizzle ORM schemas and connections
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ pnpm run db:generate
 pnpm run db:migrate
 pnpm run db:seed
 
-# Start all services (API + User App + Admin App)
+# Start development environment
 pnpm run dev
 ```
 
@@ -36,7 +36,7 @@ pnpm run dev
 | Service | URL | Description |
 |---------|-----|-------------|
 | User App | http://localhost:3000 | Main social media interface |
-| API Server | http://localhost:3001 | gRPC API (health check at /health) |
+| Admin App | http://localhost:3002 | Admin dashboard |
 
 
 
@@ -170,8 +170,7 @@ pnpm run test:e2e         # Run E2E tests only (client apps)
 | **Framework** | TanStack Start (React 19) |
 | **Language** | TypeScript (strict mode) |
 | **Styling** | StyleX |
-| **API** | gRPC with Protocol Buffers |
-| **Database** | SQLite with Drizzle ORM |
+| **Database** | SQLite with Drizzle ORM (Turso/LibSQL compatible) |
 | **Linting** | Biome |
 | **Testing** | Vitest (unit) + Playwright (E2E) |
 | **Package Manager** | pnpm |
@@ -231,57 +230,28 @@ pnpm run db:migrate
 pnpm run db:seed
 ```
 
-## API Services
-
-The API uses gRPC with the following services:
-
-- `AuthService` - Authentication (login, register, validate session)
-- `UsersService` - User management and profiles
-- `PostsService` - Post CRUD operations
-- `CommentsService` - Comment operations
-- `LikesService` - Like/unlike functionality
-- `FollowsService` - Follow/unfollow users
-- `BookmarksService` - Bookmark management
-- `NotificationsService` - Notification handling
-- `SearchService` - Search posts and users
-- `AdminService` - Admin-only operations
-
-Proto definitions are in `packages/proto/protos/`.
-
 ## 🚀 Deployment Guide
 
-Vaye is fully prepared for production deployment. The most robust way to deploy the entire monorepo stack (gRPC API, Client User App, Client Admin App) is via **Docker Compose**.
+Vaye is fully prepared for free serverless production deployment on platforms like Vercel, combined with a Turso or Neon database.
 
 ### 1. Prerequisites
-- **Docker** and **Docker Compose** installed on your server (VPS, EC2, DigitalOcean, etc.).
-- A domain name (optional but recommended for HTTPS).
+- A **Vercel** account (or similar serverless provider).
+- A **Turso** account for free serverless SQLite.
 
-### 2. Environment Setup
-Create a `.env` file in the root directory and configure your secure secrets:
+### 2. Database Setup (Turso)
+1. Create a database on Turso.
+2. Get the database URL and Auth Token.
+
+### 3. Vercel Deployment
+1. Import your GitHub repository into Vercel.
+2. Set the root directory to `apps/client-user` (or deploy them as separate projects).
+3. Configure the following Environment Variables in Vercel:
 ```bash
-# Secure 32+ character secrets (MUST change in production)
+# Secure 32+ character secrets
 SESSION_SECRET=your-secure-random-secret-key-32-chars
-GRPC_JWT_SECRET=your-secure-random-jwt-secret-key
+
+# Turso DB Configuration
+DATABASE_URL=libsql://your-database-name.turso.io
+DATABASE_AUTH_TOKEN=your-turso-auth-token
 ```
-
-### 3. Deploy with Docker Compose
-The provided `docker-compose.yml` orchestrates all three apps automatically. To build and start the entire stack in detached mode:
-```bash
-docker-compose up -d --build
-```
-
-The services will be exposed internally on:
-- **User App**: http://localhost:3000
-- **Admin App**: http://localhost:3002
-- **API Server**: http://localhost:3001 (gRPC on 50051)
-
-### 4. Database Persistence
-The SQLite database is safely stored in a persistent Docker volume named `vaye-data`. To back up your data, you simply back up this volume. Your database will survive container restarts and rebuilds.
-
-### 5. Production Checklist & Reverse Proxy
-- [ ] Change all default secrets in `.env`.
-- [ ] Ensure ports 3000, 3001, 3002, and 50051 are properly firewalled from the public internet.
-- [ ] Set `NODE_ENV=production` in your environment (handled by Docker Compose).
-- [ ] Use a reverse proxy like **Nginx** or **Caddy** to securely expose the client apps and handle SSL (HTTPS):
-  - Point `vaye.yourdomain.com` -> `localhost:3000` (User App)
-  - Point `admin.vaye.yourdomain.com` -> `localhost:3002` (Admin App)
+4. Deploy! Because the app now uses direct DB queries instead of a separate background API server, it runs perfectly within Vercel's serverless functions.

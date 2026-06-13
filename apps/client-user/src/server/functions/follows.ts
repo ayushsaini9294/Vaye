@@ -1,100 +1,179 @@
+import { db, schema } from "@vaye/db-schema/db";
+import { generateId } from "@vaye/db-schema/utils";
 import { createServerFn } from "@tanstack/react-start";
-import { getGrpcClient, getGrpcSessionToken, requireGrpcSessionToken } from "../../lib/grpc.server";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import { getSessionData, requireAuth } from "../../lib/session.server";
 
+const { follows, users, notifications } = schema;
+
+// ─── Toggle Follow ───────────────────────────────────────────────────────────
 export const toggleFollow = createServerFn({ method: "POST" })
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: username }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await requireAuth();
+		const followerId = session.userId;
 
-		const { response } = await client.follows.toggleFollow({
-			sessionToken,
-			username,
-		});
+		const userToFollow = await db.select().from(users).where(eq(users.username, username)).get();
+		if (!userToFollow) throw new Error("User not found");
+		if (userToFollow.id === followerId) throw new Error("You cannot follow yourself");
 
-		if (!response.success) {
-			throw new Error(response.error || "Failed to toggle follow");
+		const existingFollow = await db
+			.select()
+			.from(follows)
+			.where(and(eq(follows.followerId, followerId), eq(follows.followingId, userToFollow.id)))
+			.get();
+
+		if (existingFollow) {
+			await db.delete(follows).where(eq(follows.id, existingFollow.id));
+			return { success: true, following: false };
 		}
 
-		return { success: true, following: response.following };
+		await db
+			.insert(follows)
+			.values({ id: generateId(), followerId, followingId: userToFollow.id });
+
+		// Notify the followed user
+		if (userToFollow.id !== followerId) {
+			await db.insert(notifications).values({
+				id: generateId(),
+				userId: userToFollow.id,
+				type: "follow",
+				actorId: followerId,
+			});
+		}
+
+		return { success: true, following: true };
 	});
 
+// ─── Get Follow Status ───────────────────────────────────────────────────────
 export const getFollowStatus = createServerFn()
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: username }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await requireAuth();
+		const userToCheck = await db.select().from(users).where(eq(users.username, username)).get();
+		if (!userToCheck) throw new Error("User not found");
 
-		const { response } = await client.follows.getFollowStatus({
-			sessionToken,
-			username,
-		});
+		const follow = await db
+			.select()
+			.from(follows)
+			.where(and(eq(follows.followerId, session.userId), eq(follows.followingId, userToCheck.id)))
+			.get();
 
-		return { following: response.following };
+		return { following: !!follow };
 	});
 
+// ─── Follower Count ──────────────────────────────────────────────────────────
 export const getFollowerCount = createServerFn()
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: username }) => {
-		const client = getGrpcClient();
+		const user = await db.select().from(users).where(eq(users.username, username)).get();
+		if (!user) throw new Error("User not found");
 
-		const { response } = await client.follows.getFollowerCount({
-			username,
-		});
+		const result = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(follows)
+			.where(eq(follows.followingId, user.id))
+			.get();
 
-		return response.count;
+		return result?.count || 0;
 	});
 
+// ─── Following Count ─────────────────────────────────────────────────────────
 export const getFollowingCount = createServerFn()
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: username }) => {
-		const client = getGrpcClient();
+		const user = await db.select().from(users).where(eq(users.username, username)).get();
+		if (!user) throw new Error("User not found");
 
-		const { response } = await client.follows.getFollowingCount({
-			username,
-		});
+		const result = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(follows)
+			.where(eq(follows.followerId, user.id))
+			.get();
 
-		return response.count;
+		return result?.count || 0;
 	});
 
+// ─── Get Followers List ──────────────────────────────────────────────────────
 export const getFollowersFn = createServerFn()
 	.inputValidator((d: { username: string; limit?: number; offset?: number }) => d)
 	.handler(async ({ data }) => {
-		const sessionToken = await getGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await getSessionData();
+		const user = await db.select().from(users).where(eq(users.username, data.username)).get();
+		if (!user) throw new Error("User not found");
 
-		const { response } = await client.follows.getFollowers({
-			username: data.username,
-			sessionToken: sessionToken || undefined,
-			pagination: {
-				limit: data.limit || 20,
-				offset: data.offset || 0,
-			},
-		});
+		const followersResult = await db
+			.select({
+				id: users.id,
+				username: users.username,
+				displayName: users.displayName,
+				avatarUrl: users.avatarUrl,
+				bio: users.bio,
+			})
+			.from(follows)
+			.innerJoin(users, eq(follows.followerId, users.id))
+			.where(eq(follows.followingId, user.id))
+			.limit(data.limit || 20)
+			.offset(data.offset || 0);
 
-		return {
-			users: response.users,
-			total: response.total,
-		};
+		const total = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(follows)
+			.where(eq(follows.followingId, user.id))
+			.get();
+
+		let resultUsers = followersResult.map((u) => ({ ...u, isFollowing: false }));
+		if (session && resultUsers.length > 0) {
+			const ids = resultUsers.map((u) => u.id);
+			const existingFollows = await db
+				.select({ followingId: follows.followingId })
+				.from(follows)
+				.where(and(eq(follows.followerId, session.userId), inArray(follows.followingId, ids)));
+			const followedSet = new Set(existingFollows.map((f) => f.followingId));
+			resultUsers = resultUsers.map((u) => ({ ...u, isFollowing: followedSet.has(u.id) }));
+		}
+
+		return { users: resultUsers, total: total?.count || 0 };
 	});
 
+// ─── Get Following List ──────────────────────────────────────────────────────
 export const getFollowingFn = createServerFn()
 	.inputValidator((d: { username: string; limit?: number; offset?: number }) => d)
 	.handler(async ({ data }) => {
-		const sessionToken = await getGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await getSessionData();
+		const user = await db.select().from(users).where(eq(users.username, data.username)).get();
+		if (!user) throw new Error("User not found");
 
-		const { response } = await client.follows.getFollowing({
-			username: data.username,
-			sessionToken: sessionToken || undefined,
-			pagination: {
-				limit: data.limit || 20,
-				offset: data.offset || 0,
-			},
-		});
+		const followingResult = await db
+			.select({
+				id: users.id,
+				username: users.username,
+				displayName: users.displayName,
+				avatarUrl: users.avatarUrl,
+				bio: users.bio,
+			})
+			.from(follows)
+			.innerJoin(users, eq(follows.followingId, users.id))
+			.where(eq(follows.followerId, user.id))
+			.limit(data.limit || 20)
+			.offset(data.offset || 0);
 
-		return {
-			users: response.users,
-			total: response.total,
-		};
+		const total = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(follows)
+			.where(eq(follows.followerId, user.id))
+			.get();
+
+		let resultUsers = followingResult.map((u) => ({ ...u, isFollowing: false }));
+		if (session && resultUsers.length > 0) {
+			const ids = resultUsers.map((u) => u.id);
+			const existingFollows = await db
+				.select({ followingId: follows.followingId })
+				.from(follows)
+				.where(and(eq(follows.followerId, session.userId), inArray(follows.followingId, ids)));
+			const followedSet = new Set(existingFollows.map((f) => f.followingId));
+			resultUsers = resultUsers.map((u) => ({ ...u, isFollowing: followedSet.has(u.id) }));
+		}
+
+		return { users: resultUsers, total: total?.count || 0 };
 	});

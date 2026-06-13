@@ -1,103 +1,156 @@
+import { db, schema } from "@vaye/db-schema/db";
+import { generateId } from "@vaye/db-schema/utils";
 import { createServerFn } from "@tanstack/react-start";
-import type { ConversationResponse, MessageResponse } from "@vaye/proto";
-import { fromProtoTimestamp, getGrpcClient, requireGrpcSessionToken } from "../../lib/grpc.server";
+import { and, desc, eq, or, sql } from "drizzle-orm";
+import { requireAuth } from "../../lib/session.server";
 
-function mapConversationResponse(c: ConversationResponse) {
-	return {
-		id: c.id,
-		unreadCount: c.unreadCount,
-		updatedAt: c.updatedAt ? fromProtoTimestamp(c.updatedAt) : new Date(),
-		otherUser: c.otherUser
-			? {
-					id: c.otherUser.id,
-					username: c.otherUser.username,
-					displayName: c.otherUser.displayName,
-					avatarUrl: c.otherUser.avatarUrl,
-				}
-			: null,
-		lastMessage: c.lastMessage ? mapMessageResponse(c.lastMessage) : null,
-	};
-}
+const { conversations, messages, users } = schema;
 
-function mapMessageResponse(m: MessageResponse) {
-	return {
-		id: m.id,
-		conversationId: m.conversationId,
-		senderId: m.senderId,
-		content: m.content,
-		read: m.read,
-		createdAt: m.createdAt ? fromProtoTimestamp(m.createdAt) : new Date(),
-	};
-}
-
+// ─── Get Conversations ───────────────────────────────────────────────────────
 export const getConversations = createServerFn()
 	.inputValidator((d?: { limit?: number; offset?: number }) => d)
 	.handler(async ({ data: options }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await requireAuth();
+		const { userId } = session;
+		const limit = options?.limit || 20;
+		const offset = options?.offset || 0;
 
-		const { response } = await client.chat.getConversations({
-			sessionToken,
-			pagination: {
-				limit: options?.limit || 20,
-				offset: options?.offset || 0,
-			},
-		});
+		const convs = await db
+			.select()
+			.from(conversations)
+			.where(or(eq(conversations.user1Id, userId), eq(conversations.user2Id, userId)))
+			.orderBy(desc(conversations.updatedAt))
+			.limit(limit)
+			.offset(offset);
 
-		return response.conversations.map(mapConversationResponse);
+		return Promise.all(
+			convs.map(async (conv) => {
+				const otherUserId = conv.user1Id === userId ? conv.user2Id : conv.user1Id;
+
+				const otherUser = await db
+					.select({
+						id: users.id,
+						username: users.username,
+						displayName: users.displayName,
+						avatarUrl: users.avatarUrl,
+					})
+					.from(users)
+					.where(eq(users.id, otherUserId))
+					.get();
+
+				const lastMessage = await db
+					.select()
+					.from(messages)
+					.where(eq(messages.conversationId, conv.id))
+					.orderBy(desc(messages.createdAt))
+					.limit(1)
+					.get();
+
+				// Unread count (messages sent by the other user that are unread)
+				const unreadMessages = await db
+					.select()
+					.from(messages)
+					.where(
+						and(
+							eq(messages.conversationId, conv.id),
+							eq(messages.read, false),
+							eq(messages.senderId, otherUserId),
+						),
+					);
+
+				return {
+					id: conv.id,
+					updatedAt: conv.updatedAt,
+					unreadCount: unreadMessages.length,
+					otherUser: otherUser || null,
+					lastMessage: lastMessage || null,
+				};
+			}),
+		);
 	});
 
+// ─── Get Messages in a Conversation ─────────────────────────────────────────
 export const getMessages = createServerFn()
 	.inputValidator((d: { conversationId: string; limit?: number; offset?: number }) => d)
 	.handler(async ({ data }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		await requireAuth();
 
-		const { response } = await client.chat.getMessages({
-			sessionToken,
-			conversationId: data.conversationId,
-			pagination: {
-				limit: data.limit || 50,
-				offset: data.offset || 0,
-			},
-		});
-
-		return response.messages.map(mapMessageResponse);
+		return db
+			.select()
+			.from(messages)
+			.where(eq(messages.conversationId, data.conversationId))
+			.orderBy(desc(messages.createdAt))
+			.limit(data.limit || 50)
+			.offset(data.offset || 0);
 	});
 
+// ─── Send Message ────────────────────────────────────────────────────────────
 export const sendMessage = createServerFn({ method: "POST" })
 	.inputValidator((d: { receiverUsername: string; content: string }) => d)
 	.handler(async ({ data }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await requireAuth();
+		const { userId } = session;
 
-		const { response } = await client.chat.sendMessage({
-			sessionToken,
-			receiverUsername: data.receiverUsername,
-			content: data.content,
-		});
+		const receiver = await db
+			.select()
+			.from(users)
+			.where(eq(users.username, data.receiverUsername))
+			.get();
+		if (!receiver) throw new Error("User not found");
+		if (receiver.id === userId) throw new Error("Cannot message yourself");
 
-		if (!response.success || !response.message) {
-			throw new Error(response.error || "Failed to send message");
+		// Find or create conversation between the two users
+		const [u1, u2] = userId < receiver.id ? [userId, receiver.id] : [receiver.id, userId];
+
+		let conv = await db
+			.select()
+			.from(conversations)
+			.where(and(eq(conversations.user1Id, u1), eq(conversations.user2Id, u2)))
+			.get();
+
+		if (!conv) {
+			const convId = generateId();
+			await db.insert(conversations).values({ id: convId, user1Id: u1, user2Id: u2 });
+			conv = await db.select().from(conversations).where(eq(conversations.id, convId)).get();
 		}
 
-		return mapMessageResponse(response.message);
+		if (!conv) throw new Error("Failed to create conversation");
+
+		const messageId = generateId();
+		const now = new Date();
+
+		await db.insert(messages).values({
+			id: messageId,
+			conversationId: conv.id,
+			senderId: userId,
+			content: data.content,
+			read: false,
+		});
+
+		// Update conversation timestamp
+		await db
+			.update(conversations)
+			.set({ updatedAt: now })
+			.where(eq(conversations.id, conv.id));
+
+		return { id: messageId, conversationId: conv.id, senderId: userId, content: data.content, read: false, createdAt: now };
 	});
 
+// ─── Mark Conversation as Read ───────────────────────────────────────────────
 export const markAsRead = createServerFn({ method: "POST" })
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: conversationId }) => {
-		const sessionToken = await requireGrpcSessionToken();
-		const client = getGrpcClient();
+		const session = await requireAuth();
 
-		const { response } = await client.chat.markAsRead({
-			sessionToken,
-			conversationId,
-		});
-
-		if (!response.success) {
-			throw new Error(response.error || "Failed to mark as read");
-		}
+		await db
+			.update(messages)
+			.set({ read: true })
+			.where(
+				and(
+					eq(messages.conversationId, conversationId),
+					sql`${messages.senderId} != ${session.userId}`
+				),
+			);
 
 		return { success: true };
 	});

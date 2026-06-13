@@ -1,100 +1,95 @@
+import { db, schema } from "@vaye/db-schema/db";
+import { generateId, hashPassword, verifyPassword } from "@vaye/db-schema/utils";
 import { createServerFn } from "@tanstack/react-start";
-import { fromProtoTimestamp, getGrpcClient, getGrpcSessionToken } from "../../lib/grpc.server";
+import { eq } from "drizzle-orm";
 import { clearSessionData, getSessionData, setSessionData } from "../../lib/session.server";
 
+const { users } = schema;
+
+// ─── Register ────────────────────────────────────────────────────────────────
 export const registerUser = createServerFn({ method: "POST" })
 	.inputValidator(
 		(d: { email: string; username: string; displayName: string; password: string }) => d,
 	)
 	.handler(async ({ data }) => {
-		const client = getGrpcClient();
+		// Check if email already exists
+		const existingEmail = await db.select().from(users).where(eq(users.email, data.email)).get();
+		if (existingEmail) throw new Error("User with this email already exists");
 
-		const { response } = await client.auth.register({
+		// Check if username already exists
+		const existingUsername = await db
+			.select()
+			.from(users)
+			.where(eq(users.username, data.username))
+			.get();
+		if (existingUsername) throw new Error("Username already taken");
+
+		// Create user
+		const userId = generateId();
+		const passwordHash = await hashPassword(data.password);
+		await db.insert(users).values({
+			id: userId,
 			email: data.email,
 			username: data.username,
 			displayName: data.displayName,
-			password: data.password,
+			passwordHash,
+			role: "user",
 		});
 
-		if (!response.success) {
-			throw new Error(response.error || "Registration failed");
-		}
-
-		// Store session in cookie
-		await setSessionData({
-			userId: response.userId,
-			username: data.username,
-		});
-
-		return { success: true, userId: response.userId };
+		// Save session cookie
+		await setSessionData({ userId, username: data.username });
+		return { success: true, userId };
 	});
 
+// ─── Login ───────────────────────────────────────────────────────────────────
 export const loginUser = createServerFn({ method: "POST" })
 	.inputValidator((d: { email: string; password: string }) => d)
 	.handler(async ({ data }) => {
-		const client = getGrpcClient();
+		const user = await db.select().from(users).where(eq(users.email, data.email)).get();
+		if (!user) throw new Error("Invalid email or password");
 
-		const { response } = await client.auth.login({
-			email: data.email,
-			password: data.password,
-		});
+		if (user.bannedAt) throw new Error(`Account banned: ${user.bannedReason || "No reason provided"}`);
 
-		if (!response.success) {
-			throw new Error(response.error || "Login failed");
-		}
+		const valid = await verifyPassword(data.password, user.passwordHash);
+		if (!valid) throw new Error("Invalid email or password");
 
-		// We need to get the username for the session - validate the returned token
-		const { response: validateResponse } = await client.auth.validateSession({
-			sessionToken: response.sessionToken,
-		});
-
-		if (!validateResponse.valid) {
-			throw new Error("Failed to validate session");
-		}
-
-		// Store session in cookie
-		await setSessionData({
-			userId: response.userId,
-			username: validateResponse.username,
-		});
-
-		return { success: true, userId: response.userId };
+		await setSessionData({ userId: user.id, username: user.username });
+		return { success: true, userId: user.id };
 	});
 
+// ─── Logout ──────────────────────────────────────────────────────────────────
 export const logoutUser = createServerFn({ method: "POST" }).handler(async () => {
-	const sessionToken = await getGrpcSessionToken();
-	if (sessionToken) {
-		const client = getGrpcClient();
-		await client.auth.logout({ sessionToken });
-	}
 	await clearSessionData();
 	return { success: true };
 });
 
+// ─── Get Current User ────────────────────────────────────────────────────────
 export const getCurrentUser = createServerFn().handler(async () => {
 	const session = await getSessionData();
 	if (!session) return null;
 
-	const sessionToken = await getGrpcSessionToken();
-	if (!sessionToken) {
-		await clearSessionData();
-		return null;
-	}
-
 	try {
-		const client = getGrpcClient();
-		const { response } = await client.auth.getCurrentUser({ sessionToken });
+		const user = await db
+			.select({
+				id: users.id,
+				email: users.email,
+				username: users.username,
+				displayName: users.displayName,
+				avatarUrl: users.avatarUrl,
+				bio: users.bio,
+				role: users.role,
+				createdAt: users.createdAt,
+			})
+			.from(users)
+			.where(eq(users.id, session.userId))
+			.get();
 
-		return {
-			id: response.id,
-			email: response.email,
-			username: response.username,
-			displayName: response.displayName,
-			avatarUrl: response.avatarUrl,
-			bio: response.bio,
-			role: response.role,
-			createdAt: fromProtoTimestamp(response.createdAt),
-		};
+		if (!user) {
+			await clearSessionData();
+			return null;
+		}
+
+		return user;
 	} catch {
 		await clearSessionData();
 		return null;

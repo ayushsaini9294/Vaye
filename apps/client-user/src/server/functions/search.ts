@@ -1,76 +1,86 @@
+import { db, schema } from "@vaye/db-schema/db";
 import { createServerFn } from "@tanstack/react-start";
-import type { PostResponse, UserSearchResult } from "@vaye/proto";
-import { fromProtoTimestamp, getGrpcClient, getGrpcSessionToken } from "../../lib/grpc.server";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { getSessionData } from "../../lib/session.server";
 
-function mapPostResponse(post: PostResponse) {
-	return {
-		id: post.id,
-		content: post.content,
-		createdAt: fromProtoTimestamp(post.createdAt),
-		updatedAt: fromProtoTimestamp(post.updatedAt),
-		author: post.author
-			? {
-					id: post.author.id,
-					username: post.author.username,
-					displayName: post.author.displayName,
-					avatarUrl: post.author.avatarUrl,
-				}
-			: null,
-		likeCount: post.likeCount,
-		commentCount: post.commentCount,
-		isLiked: post.isLiked,
-	};
+const { posts, users, likes, comments } = schema;
+
+async function getPostCounts(postId: string, userId?: string | null) {
+	const likeCount = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(likes)
+		.where(eq(likes.postId, postId))
+		.get();
+	const commentCount = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(comments)
+		.where(eq(comments.postId, postId))
+		.get();
+	let isLiked = false;
+	if (userId) {
+		const l = await db
+			.select()
+			.from(likes)
+			.where(and(eq(likes.postId, postId), eq(likes.userId, userId)))
+			.get();
+		isLiked = !!l;
+	}
+	return { likeCount: likeCount?.count || 0, commentCount: commentCount?.count || 0, isLiked };
 }
 
-function mapUserSearchResult(user: UserSearchResult) {
-	return {
-		id: user.id,
-		username: user.username,
-		displayName: user.displayName,
-		avatarUrl: user.avatarUrl,
-		bio: user.bio,
-	};
-}
-
+// ─── Search Posts ────────────────────────────────────────────────────────────
 export const searchPosts = createServerFn()
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: query }) => {
-		if (!query || query.trim().length === 0) {
-			return [];
-		}
+		if (!query?.trim()) return [];
+		const session = await getSessionData();
+		const pattern = `%${query}%`;
 
-		const sessionToken = await getGrpcSessionToken();
-		const client = getGrpcClient();
+		const result = await db
+			.select({
+				id: posts.id,
+				content: posts.content,
+				createdAt: posts.createdAt,
+				updatedAt: posts.updatedAt,
+				author: {
+					id: users.id,
+					username: users.username,
+					displayName: users.displayName,
+					avatarUrl: users.avatarUrl,
+				},
+			})
+			.from(posts)
+			.leftJoin(users, eq(posts.authorId, users.id))
+			.where(like(posts.content, pattern))
+			.orderBy(desc(posts.createdAt))
+			.limit(50);
 
-		const { response } = await client.search.searchPosts({
-			sessionToken: sessionToken || "",
-			query,
-		});
-
-		return response.posts.map(mapPostResponse);
+		return Promise.all(
+			result.map(async (post) => ({ ...post, ...(await getPostCounts(post.id, session?.userId)) })),
+		);
 	});
 
+// ─── Search Users ────────────────────────────────────────────────────────────
 export const searchUsers = createServerFn()
 	.inputValidator((d: string) => d)
 	.handler(async ({ data: query }) => {
-		if (!query || query.trim().length === 0) {
-			return [];
-		}
+		if (!query?.trim()) return [];
+		const pattern = `%${query.toLowerCase()}%`;
 
-		const client = getGrpcClient();
-
-		try {
-			console.log("[searchUsers] Calling gRPC with query:", query);
-			const { response } = await client.search.searchUsers({
-				query,
-			});
-			console.log("[searchUsers] Raw response:", JSON.stringify(response));
-			console.log("[searchUsers] Users count:", response.users.length);
-			const mapped = response.users.map(mapUserSearchResult);
-			console.log("[searchUsers] Mapped results:", JSON.stringify(mapped));
-			return mapped;
-		} catch (error) {
-			console.error("[searchUsers] gRPC call FAILED:", error);
-			throw error;
-		}
+		return db
+			.select({
+				id: users.id,
+				username: users.username,
+				displayName: users.displayName,
+				avatarUrl: users.avatarUrl,
+				bio: users.bio,
+			})
+			.from(users)
+			.where(
+				or(
+					sql`LOWER(${users.username}) LIKE ${pattern}`,
+					sql`LOWER(${users.displayName}) LIKE ${pattern}`,
+				),
+			)
+			.limit(20);
 	});
