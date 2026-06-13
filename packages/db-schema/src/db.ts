@@ -6,7 +6,7 @@ import * as schema from "./schema";
 // In development: reads from local vaye.db file.
 // In production (Vercel + Turso): reads from DATABASE_URL + DATABASE_AUTH_TOKEN env vars.
 const client = createClient({
-	url: process.env.DATABASE_URL || "file:../../apps/api/vaye.db",
+	url: process.env.DATABASE_URL || "file:../../vaye.db",
 	authToken: process.env.DATABASE_AUTH_TOKEN,
 });
 
