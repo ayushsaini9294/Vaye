@@ -1,8 +1,18 @@
-import { createServerFn } from "@tanstack/react-start";
-import { db } from "@vaye/db-schema/db";
-import { users, posts, reports, auditLogs, comments, type User, type Post, type Report, type AuditLog } from "@vaye/db-schema";
 import crypto from "node:crypto";
-import { count, desc, eq, ilike, and, or, isNotNull } from "drizzle-orm";
+import { createServerFn } from "@tanstack/react-start";
+import {
+	type AuditLog,
+	auditLogs,
+	comments,
+	type Post,
+	posts,
+	type Report,
+	reports,
+	type User,
+	users,
+} from "@vaye/db-schema";
+import { db } from "@vaye/db-schema/db";
+import { and, count, desc, eq, ilike, isNotNull, or } from "drizzle-orm";
 import { requireAdminAuth } from "../../lib/session.server";
 
 export const getDashboardStatsFn = createServerFn({ method: "GET" }).handler(async () => {
@@ -11,8 +21,14 @@ export const getDashboardStatsFn = createServerFn({ method: "GET" }).handler(asy
 	const [{ totalUsers }] = await db.select({ totalUsers: count() }).from(users);
 	const [{ totalPosts }] = await db.select({ totalPosts: count() }).from(posts);
 	const [{ totalComments }] = await db.select({ totalComments: count() }).from(comments);
-	const [{ pendingReports }] = await db.select({ pendingReports: count() }).from(reports).where(eq(reports.status, "pending"));
-	const [{ bannedUsers }] = await db.select({ bannedUsers: count() }).from(users).where(isNotNull(users.bannedAt));
+	const [{ pendingReports }] = await db
+		.select({ pendingReports: count() })
+		.from(reports)
+		.where(eq(reports.status, "pending"));
+	const [{ bannedUsers }] = await db
+		.select({ bannedUsers: count() })
+		.from(users)
+		.where(isNotNull(users.bannedAt));
 
 	// For simplicity, just return 0 for newUsersToday and newPostsToday if sqlite date parsing is hard,
 	// or actually count them. Let's just return 0 for now to satisfy the types since this is a demo.
@@ -26,7 +42,7 @@ export const getDashboardStatsFn = createServerFn({ method: "GET" }).handler(asy
 		pendingReports,
 		bannedUsers,
 		newUsersToday,
-		newPostsToday
+		newPostsToday,
 	};
 });
 
@@ -47,8 +63,8 @@ export const getUsersFn = createServerFn({ method: "GET" })
 				or(
 					ilike(users.username, `%${data.searchQuery}%`),
 					ilike(users.email, `%${data.searchQuery}%`),
-					ilike(users.displayName, `%${data.searchQuery}%`)
-				)
+					ilike(users.displayName, `%${data.searchQuery}%`),
+				),
 			);
 		}
 		if (data.roleFilter === "banned") {
@@ -66,7 +82,10 @@ export const getUsersFn = createServerFn({ method: "GET" })
 			orderBy: [desc(users.createdAt)],
 		});
 
-		const [{ totalCount }] = await db.select({ totalCount: count() }).from(users).where(whereClause);
+		const [{ totalCount }] = await db
+			.select({ totalCount: count() })
+			.from(users)
+			.where(whereClause);
 
 		return {
 			users: dbUsers.map((u: User) => ({
@@ -128,7 +147,9 @@ export const getReportsFn = createServerFn({ method: "GET" })
 
 		const conditions = [];
 		if (data.statusFilter) {
-			conditions.push(eq(reports.status, data.statusFilter as "pending" | "reviewed" | "actioned" | "dismissed"));
+			conditions.push(
+				eq(reports.status, data.statusFilter as "pending" | "reviewed" | "actioned" | "dismissed"),
+			);
 		}
 		if (data.typeFilter) {
 			conditions.push(eq(reports.targetType, data.typeFilter as "post" | "user" | "comment"));
@@ -146,7 +167,10 @@ export const getReportsFn = createServerFn({ method: "GET" })
 			},
 		});
 
-		const [{ totalCount }] = await db.select({ totalCount: count() }).from(reports).where(whereClause);
+		const [{ totalCount }] = await db
+			.select({ totalCount: count() })
+			.from(reports)
+			.where(whereClause);
 
 		return {
 			reports: dbReports.map((r: Report & { reporter?: User }) => ({
@@ -201,7 +225,10 @@ export const getAuditLogsFn = createServerFn({ method: "GET" })
 			},
 		});
 
-		const [{ totalCount }] = await db.select({ totalCount: count() }).from(auditLogs).where(whereClause);
+		const [{ totalCount }] = await db
+			.select({ totalCount: count() })
+			.from(auditLogs)
+			.where(whereClause);
 
 		return {
 			logs: dbLogs.map((l: AuditLog & { admin?: User }) => ({
@@ -283,7 +310,8 @@ export const banUserFn = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const session = await requireAdminAuth();
 
-		await db.update(users)
+		await db
+			.update(users)
 			.set({
 				bannedAt: new Date(),
 				bannedReason: data.reason,
@@ -308,7 +336,8 @@ export const unbanUserFn = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const session = await requireAdminAuth();
 
-		await db.update(users)
+		await db
+			.update(users)
 			.set({
 				bannedAt: null,
 				bannedReason: null,
@@ -333,7 +362,8 @@ export const updateUserRoleFn = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const session = await requireAdminAuth();
 
-		await db.update(users)
+		await db
+			.update(users)
 			.set({
 				role: data.role as "user" | "admin" | "moderator",
 			})
