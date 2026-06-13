@@ -48,9 +48,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Generate protobuf
-        run: pnpm run proto:generate
-
       - name: Run lint
         run: pnpm run lint
 

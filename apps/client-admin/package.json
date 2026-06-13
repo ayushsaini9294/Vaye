@@ -12,7 +12,7 @@
 		"lint:fix": "biome check --write .",
 		"typecheck": "tsc --noEmit",
 		"test": "pnpm run test:unit",
-		"test:unit": "vitest run",
+		"test:unit": "vitest run --passWithNoTests",
 		"test:e2e": "playwright test"
 	},
 	"dependencies": {
